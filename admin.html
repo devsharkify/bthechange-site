@@ -175,6 +175,7 @@
           <button class="admin-tab" data-tab="code">💻 Code</button>
           <button class="admin-tab" data-tab="certificates">🏅 Certificates</button>
           <button class="admin-tab" data-tab="teachers">👩‍🏫 Teachers</button>
+          <button class="admin-tab" data-tab="resources">📚 Resources</button>
         </div>
 
         <div class="admin-toolbar" id="admin-toolbar" style="display: none;">
@@ -193,6 +194,7 @@
         <div id="admin-code-panel" style="display:none;"></div>
         <div id="admin-certs-panel" style="display:none;"></div>
         <div id="admin-teachers-panel" style="display:none;"></div>
+        <div id="admin-resources-panel" style="display:none;"></div>
 
         <!-- Sticky bulk action bar -->
         <div class="admin-batch-bar" id="admin-batch-bar" aria-hidden="true">
@@ -595,6 +597,7 @@ document.querySelectorAll('[data-count]').forEach(el => countObserver.observe(el
   const codePanel = document.getElementById('admin-code-panel');
   const certsPanel = document.getElementById('admin-certs-panel');
   const teachersPanel = document.getElementById('admin-teachers-panel');
+  const resourcesPanel = document.getElementById('admin-resources-panel');
 
   function showAdminPanel(tab) {
     const isSubmissions = ['pending','approved','rejected'].includes(tab);
@@ -605,6 +608,7 @@ document.querySelectorAll('[data-count]').forEach(el => countObserver.observe(el
     codePanel.style.display = tab === 'code' ? '' : 'none';
     certsPanel.style.display = tab === 'certificates' ? '' : 'none';
     teachersPanel.style.display = tab === 'teachers' ? '' : 'none';
+    resourcesPanel.style.display = tab === 'resources' ? '' : 'none';
   }
 
   // ===== TAB SWITCH =====
@@ -621,6 +625,7 @@ document.querySelectorAll('[data-count]').forEach(el => countObserver.observe(el
       else if (currentTab === 'code') loadAdminCode();
       else if (currentTab === 'certificates') loadAdminCerts();
       else if (currentTab === 'teachers') loadAdminTeachers();
+      else if (currentTab === 'resources') loadAdminResources();
       else loadSubmissions();
     });
   });
@@ -956,6 +961,121 @@ document.querySelectorAll('[data-count]').forEach(el => countObserver.observe(el
             + '<div><strong>' + esc(t.display_name || 'Unknown') + '</strong><div style="font-size:11px;color:var(--ink-3);">' + esc(roleLbl) + '</div></div>'
             + '</div>';
         }).join('');
+  }
+
+  // ===== RESOURCES =====
+  const RES_PROGRAMS = [
+    { val:'all',                     label:'All programs' },
+    { val:'coding-on-wheels',        label:'Coding on Wheels' },
+    { val:'lawgic',                  label:'L.A.W.G.I.C.' },
+    { val:'dreamcatchers',           label:'Dreamcatchers' },
+    { val:'changemakers',            label:'Changemakers' },
+    { val:'eko-warriors',            label:'Eko Warriors' },
+    { val:'we-women-empowerment',    label:'We Women Empowerment' },
+    { val:'organ-donation-on-wheels',label:'Organ Donation on Wheels' },
+    { val:'launchpad',               label:'Launchpad' },
+    { val:'pawtection-force',        label:'Pawtection Force' },
+    { val:'global-human-rights-front', label:'Global Human Rights Front' },
+    { val:'cross-connect-legal-aid', label:'Cross Connect Legal Aid' },
+  ];
+
+  function parseDriveId(raw) {
+    raw = (raw || '').trim();
+    var m = raw.match(/\/d\/([^\/\?&]+)/);
+    return m ? m[1] : raw;
+  }
+
+  function loadAdminResources() {
+    const inp = (id) => `<input id="${id}" style="width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:var(--bg);">`;
+    const sel = (id, opts) => `<select id="${id}" style="width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:var(--bg);">${opts}</select>`;
+    const progOpts = RES_PROGRAMS.map(p => `<option value="${p.val}">${p.label}</option>`).join('');
+    resourcesPanel.innerHTML = `
+      <h2 style="font-size:22px;margin:0 0 18px;">Course <em style="font-family:var(--font-serif);font-style:italic;">Resources</em></h2>
+      <div style="background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:22px;">
+        <p style="font-family:var(--font-mono);font-size:10px;letter-spacing:1.2px;color:var(--ink-3);margin:0 0 14px;">ADD RESOURCE</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div><label style="font-size:11px;color:var(--ink-3);display:block;margin-bottom:4px;">TITLE</label>${inp('res-new-title')}</div>
+          <div><label style="font-size:11px;color:var(--ink-3);display:block;margin-bottom:4px;">DESCRIPTION (short)</label>${inp('res-new-desc')}</div>
+          <div><label style="font-size:11px;color:var(--ink-3);display:block;margin-bottom:4px;">TYPE</label>${sel('res-new-type','<option value="pdf">PDF</option><option value="video">Video</option><option value="doc">Document</option>')}</div>
+          <div><label style="font-size:11px;color:var(--ink-3);display:block;margin-bottom:4px;">AUDIENCE</label>${sel('res-new-audience','<option value="both">Both (kids + volunteers)</option><option value="kids">Kids only</option><option value="volunteer">Volunteers only</option>')}</div>
+          <div><label style="font-size:11px;color:var(--ink-3);display:block;margin-bottom:4px;">PROGRAM</label>${sel('res-new-program', progOpts)}</div>
+          <div><label style="font-size:11px;color:var(--ink-3);display:block;margin-bottom:4px;">MODULE # (optional)</label><input id="res-new-module" type="number" min="0" value="0" style="width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:var(--bg);"></div>
+          <div style="grid-column:1/-1;"><label style="font-size:11px;color:var(--ink-3);display:block;margin-bottom:4px;">GOOGLE DRIVE FILE ID <span style="font-weight:400;">(paste full share link or just the ID after /d/)</span></label>${inp('res-new-drive')}</div>
+          <div><label style="font-size:11px;color:var(--ink-3);display:block;margin-bottom:4px;">SORT ORDER (0 = top)</label><input id="res-new-sort" type="number" min="0" value="0" style="width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:var(--bg);"></div>
+          <div style="display:flex;align-items:flex-end;"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;"><input type="checkbox" id="res-new-published" checked> Published immediately</label></div>
+        </div>
+        <button onclick="addAdminResource()" class="btn btn--accent" style="margin-top:14px;padding:10px 22px;">Add Resource</button>
+        <span id="res-add-msg" style="font-size:12px;color:var(--accent);margin-left:12px;"></span>
+      </div>
+      <div id="res-admin-list"><p style="color:var(--ink-3);text-align:center;padding:30px 0;">Loading...</p></div>`;
+    fetchAdminResourcesList();
+  }
+
+  async function addAdminResource() {
+    const title = document.getElementById('res-new-title').value.trim();
+    const raw   = document.getElementById('res-new-drive').value.trim();
+    const driveId = parseDriveId(raw);
+    const msg = document.getElementById('res-add-msg');
+    if (!title) { msg.textContent = 'Title required.'; msg.style.color = 'crimson'; return; }
+    if (!driveId) { msg.textContent = 'Drive File ID required.'; msg.style.color = 'crimson'; return; }
+    msg.textContent = 'Saving...'; msg.style.color = 'var(--ink-3)';
+    const { error } = await SB.from('course_resources').insert({
+      title,
+      description:   document.getElementById('res-new-desc').value.trim(),
+      resource_type: document.getElementById('res-new-type').value,
+      audience:      document.getElementById('res-new-audience').value,
+      program:       document.getElementById('res-new-program').value,
+      module_number: parseInt(document.getElementById('res-new-module').value) || 0,
+      drive_file_id: driveId,
+      sort_order:    parseInt(document.getElementById('res-new-sort').value) || 0,
+      is_published:  document.getElementById('res-new-published').checked,
+    });
+    if (error) { msg.textContent = 'Error: ' + error.message; msg.style.color = 'crimson'; return; }
+    msg.textContent = 'Added!'; msg.style.color = 'var(--accent)';
+    document.getElementById('res-new-title').value = '';
+    document.getElementById('res-new-desc').value = '';
+    document.getElementById('res-new-drive').value = '';
+    fetchAdminResourcesList();
+  }
+
+  async function fetchAdminResourcesList() {
+    const el = document.getElementById('res-admin-list');
+    if (!el) return;
+    const { data, error } = await SB.from('course_resources')
+      .select('*').order('sort_order', { ascending: true });
+    if (error || !data || !data.length) {
+      el.innerHTML = '<p style="color:var(--ink-3);text-align:center;padding:30px 0;">No resources yet. Add one above.</p>';
+      return;
+    }
+    el.innerHTML = `<p style="font-family:var(--font-mono);font-size:10px;letter-spacing:1.2px;color:var(--ink-3);margin:0 0 12px;">${data.length} RESOURCES</p>`
+      + data.map(r => {
+          const icon = r.resource_type === 'video' ? '🎬' : r.resource_type === 'pdf' ? '📄' : '📋';
+          const badge = r.is_published
+            ? '<span style="background:#dcfce7;color:#166534;font-size:10px;padding:2px 8px;border-radius:99px;font-weight:700;">LIVE</span>'
+            : '<span style="background:#fef3c7;color:#92400e;font-size:10px;padding:2px 8px;border-radius:99px;font-weight:700;">DRAFT</span>';
+          return `<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--paper);border:1px solid var(--line);border-radius:12px;margin-bottom:8px;">
+            <div style="font-size:22px;">${icon}</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:600;font-size:14px;">${esc(r.title)}</div>
+              <div style="font-size:11px;color:var(--ink-3);">${esc(r.program)} · ${esc(r.audience)} · module ${r.module_number || '—'} · sort ${r.sort_order}</div>
+              <div style="font-family:var(--font-mono);font-size:10px;color:var(--ink-3);margin-top:2px;">ID: ${esc(r.drive_file_id)}</div>
+            </div>
+            ${badge}
+            <button onclick="toggleResPublish('${r.id}',${r.is_published})" style="background:none;border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer;">${r.is_published ? 'Unpublish' : 'Publish'}</button>
+            <button onclick="deleteAdminResource('${r.id}')" style="background:none;border:1px solid #fca5a5;color:crimson;border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer;">Delete</button>
+          </div>`;
+        }).join('');
+  }
+
+  async function toggleResPublish(id, current) {
+    await SB.from('course_resources').update({ is_published: !current }).eq('id', id);
+    fetchAdminResourcesList();
+  }
+
+  async function deleteAdminResource(id) {
+    if (!confirm('Delete this resource?')) return;
+    await SB.from('course_resources').delete().eq('id', id);
+    fetchAdminResourcesList();
   }
 
   // ===== INIT =====
