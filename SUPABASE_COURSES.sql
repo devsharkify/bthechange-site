@@ -121,3 +121,37 @@ DROP POLICY IF EXISTS "volunteers read own calls" ON public.video_calls;
 CREATE POLICY "volunteers read own calls"
   ON public.video_calls FOR SELECT TO authenticated
   USING (status IN ('scheduled','live') OR created_by = auth.uid());
+
+-- ============================================================
+-- 7. Module live sessions (Google Meet links tied to a module)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.module_live_sessions (
+  id           uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  module_id    uuid NOT NULL REFERENCES public.course_modules(id) ON DELETE CASCADE,
+  course_id    uuid NOT NULL REFERENCES public.courses(id) ON DELETE CASCADE,
+  created_by   uuid REFERENCES auth.users(id) ON DELETE SET NULL,
+  title        text NOT NULL,
+  call_date    date NOT NULL,
+  call_time    text,
+  meet_link    text NOT NULL,
+  status       text NOT NULL DEFAULT 'scheduled'
+               CHECK (status IN ('scheduled','live','completed','cancelled')),
+  created_at   timestamptz DEFAULT now()
+);
+
+ALTER TABLE public.module_live_sessions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "authenticated reads upcoming sessions"
+  ON public.module_live_sessions FOR SELECT TO authenticated
+  USING (status IN ('scheduled','live'));
+CREATE POLICY "volunteers add live sessions"
+  ON public.module_live_sessions FOR INSERT TO authenticated
+  WITH CHECK (
+    created_by = auth.uid()
+    AND EXISTS (
+      SELECT 1 FROM public.profiles
+      WHERE user_id = auth.uid() AND role IN ('volunteer','admin')
+    )
+  );
+CREATE POLICY "admins manage live sessions"
+  ON public.module_live_sessions FOR ALL TO authenticated
+  USING (public.is_admin()) WITH CHECK (public.is_admin());

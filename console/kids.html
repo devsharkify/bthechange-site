@@ -630,13 +630,32 @@ function loadVideoSection() {
   if (_kidsIsDemo) { renderVideoCalls(DEMO_CALLS); return; }
   if (!_kidsSB) return;
   document.getElementById('vc-list').innerHTML = '<div class="spinner"></div>';
-  _kidsSB.from('video_calls')
-    .select('id, title, teacher, call_date, call_time, meet_link')
+  /* Load live sessions tied to course modules (the class is part of the module) */
+  var today = new Date().toISOString().slice(0,10);
+  var sessionQuery = _kidsSB
+    .from('module_live_sessions')
+    .select('id, title, call_date, call_time, meet_link, module_id, course_modules(module_number, title)')
     .in('status', ['scheduled','live'])
-    .gte('call_date', new Date().toISOString().slice(0,10))
-    .order('call_date', { ascending: true })
-    .then(function(r) { renderVideoCalls(r.data || []); })
-    .catch(function() { renderVideoCalls([]); });
+    .gte('call_date', today)
+    .order('call_date', { ascending: true });
+  /* If a course is loaded, filter to that course */
+  if (_kidsActiveCourse) {
+    sessionQuery = sessionQuery.eq('course_id', _kidsActiveCourse.id);
+  }
+  sessionQuery.then(function(r) {
+    var rows = (r.data || []).map(function(s) {
+      var mod = s.course_modules;
+      return {
+        id:       s.id,
+        title:    s.title,
+        teacher:  mod ? 'Module ' + mod.module_number + ': ' + mod.title : '',
+        call_date: s.call_date,
+        call_time: s.call_time,
+        meet_link: s.meet_link,
+      };
+    });
+    renderVideoCalls(rows);
+  }).catch(function() { renderVideoCalls([]); });
 }
 
 function loadCodeSection() {

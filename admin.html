@@ -1215,13 +1215,14 @@ document.querySelectorAll('[data-count]').forEach(el => countObserver.observe(el
 
   async function _openModule(courseId, moduleId) {
     _courseNav = { view: 'module', courseId, moduleId };
-    var [{ data: course }, { data: mod }, { data: resources }, { data: questions }] = await Promise.all([
+    var [{ data: course }, { data: mod }, { data: resources }, { data: questions }, { data: sessions }] = await Promise.all([
       SB.from('courses').select('id,title').eq('id', courseId).single(),
       SB.from('course_modules').select('*').eq('id', moduleId).single(),
       SB.from('course_resources').select('*').eq('module_id', moduleId).order('sort_order'),
       SB.from('module_questions').select('*').eq('module_id', moduleId).order('sort_order'),
+      SB.from('module_live_sessions').select('*').eq('module_id', moduleId).order('call_date'),
     ]);
-    resources = resources || []; questions = questions || [];
+    resources = resources || []; questions = questions || []; sessions = sessions || [];
 
     var driveHint = '<span style="font-size:10px;color:var(--ink-3);">Paste full Google Drive share URL or just the file ID</span>';
     var optInputs = [0,1,2,3].map(function(i) {
@@ -1286,6 +1287,30 @@ document.querySelectorAll('[data-count]').forEach(el => countObserver.observe(el
               + '</div>';
           }).join('')
         : '<p style="color:var(--ink-3);font-size:13px;padding:12px 0;">No questions yet.</p>')
+      + '</div>'
+
+      /* Live Class Sessions */
+      + '<h3 style="font-size:14px;font-weight:700;letter-spacing:.5px;margin:24px 0 12px;">LIVE CLASS SESSIONS</h3>'
+      + _card('<p style="font-family:var(--font-mono);font-size:10px;letter-spacing:1.2px;color:var(--ink-3);margin:0 0 12px;">SCHEDULE A LIVE CLASS FOR THIS MODULE</p>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
+        + '<div style="grid-column:1/-1;">' + _lbl('SESSION TITLE') + _inp('ls-title','e.g. Module 1 Live Q&A with Ravi Sir') + '</div>'
+        + '<div>' + _lbl('DATE') + _inp('ls-date','','date') + '</div>'
+        + '<div>' + _lbl('TIME (e.g. 4:00 PM)') + _inp('ls-time','4:00 PM') + '</div>'
+        + '<div style="grid-column:1/-1;">' + _lbl('GOOGLE MEET LINK') + _inp('ls-link','https://meet.google.com/xxx-xxxx-xxx') + '</div>'
+        + '</div>'
+        + '<button onclick="_addLiveSession(\'' + moduleId + '\',\'' + courseId + '\')" class="btn btn--accent" style="margin-top:12px;padding:10px 22px;">Schedule Session</button>'
+        + '<span id="ls-msg" style="font-size:12px;margin-left:12px;"></span>')
+      + '<div id="mod-live-list">'
+      + (sessions.length ? sessions.map(function(s) {
+            return '<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--paper);border:1px solid var(--line);border-radius:12px;margin-bottom:8px;">'
+              + '<div style="font-size:22px;">📅</div>'
+              + '<div style="flex:1;"><div style="font-weight:600;font-size:13px;">' + esc(s.title) + '</div>'
+              + '<div style="font-size:11px;color:var(--ink-3);">' + esc(s.call_date) + (s.call_time ? ' · ' + esc(s.call_time) : '') + '</div>'
+              + '<div style="font-family:var(--font-mono);font-size:10px;color:var(--accent);margin-top:2px;">' + esc(s.meet_link) + '</div></div>'
+              + '<button onclick="_deleteLiveSession(\'' + s.id + '\',\'' + courseId + '\',\'' + moduleId + '\')" style="background:none;border:1px solid #fca5a5;color:crimson;border-radius:8px;padding:5px 10px;font-size:11px;">Delete</button>'
+              + '</div>';
+          }).join('')
+        : '<p style="color:var(--ink-3);font-size:13px;padding:12px 0;">No live sessions scheduled yet.</p>')
       + '</div>';
   }
 
@@ -1341,6 +1366,35 @@ document.querySelectorAll('[data-count]').forEach(el => countObserver.observe(el
   async function _deleteQuestion(qId, courseId, moduleId) {
     if (!confirm('Delete this question?')) return;
     await SB.from('module_questions').delete().eq('id', qId);
+    _openModule(courseId, moduleId);
+  }
+
+  async function _addLiveSession(moduleId, courseId) {
+    var title = (document.getElementById('ls-title').value || '').trim();
+    var date  = (document.getElementById('ls-date').value || '').trim();
+    var link  = (document.getElementById('ls-link').value || '').trim();
+    var msg   = document.getElementById('ls-msg');
+    if (!title || !date || !link) { msg.textContent = 'Title, date and Meet link required.'; msg.style.color = 'crimson'; return; }
+    msg.textContent = 'Saving...'; msg.style.color = 'var(--ink-3)';
+    const { data: mod } = await SB.from('course_modules').select('course_id').eq('id', moduleId).single();
+    var { error } = await SB.from('module_live_sessions').insert({
+      module_id: moduleId,
+      course_id: mod ? mod.course_id : courseId,
+      created_by: currentUser ? currentUser.id : null,
+      title,
+      call_date: date,
+      call_time: document.getElementById('ls-time').value.trim() || null,
+      meet_link: link,
+      status: 'scheduled',
+    });
+    if (error) { msg.textContent = 'Error: ' + error.message; msg.style.color = 'crimson'; return; }
+    msg.textContent = 'Scheduled!'; msg.style.color = 'var(--accent)';
+    _openModule(courseId, moduleId);
+  }
+
+  async function _deleteLiveSession(sessionId, courseId, moduleId) {
+    if (!confirm('Delete this live session?')) return;
+    await SB.from('module_live_sessions').delete().eq('id', sessionId);
     _openModule(courseId, moduleId);
   }
 
