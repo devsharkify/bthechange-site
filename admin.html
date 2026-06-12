@@ -176,6 +176,7 @@
           <button class="admin-tab" data-tab="certificates">🏅 Certificates</button>
           <button class="admin-tab" data-tab="teachers">👩‍🏫 Teachers</button>
           <button class="admin-tab" data-tab="resources">📚 Resources</button>
+          <button class="admin-tab" data-tab="courses">🎓 Courses</button>
         </div>
 
         <div class="admin-toolbar" id="admin-toolbar" style="display: none;">
@@ -195,6 +196,7 @@
         <div id="admin-certs-panel" style="display:none;"></div>
         <div id="admin-teachers-panel" style="display:none;"></div>
         <div id="admin-resources-panel" style="display:none;"></div>
+        <div id="admin-courses-panel" style="display:none;"></div>
 
         <!-- Sticky bulk action bar -->
         <div class="admin-batch-bar" id="admin-batch-bar" aria-hidden="true">
@@ -598,6 +600,7 @@ document.querySelectorAll('[data-count]').forEach(el => countObserver.observe(el
   const certsPanel = document.getElementById('admin-certs-panel');
   const teachersPanel = document.getElementById('admin-teachers-panel');
   const resourcesPanel = document.getElementById('admin-resources-panel');
+  const coursesPanel   = document.getElementById('admin-courses-panel');
 
   function showAdminPanel(tab) {
     const isSubmissions = ['pending','approved','rejected'].includes(tab);
@@ -609,6 +612,7 @@ document.querySelectorAll('[data-count]').forEach(el => countObserver.observe(el
     certsPanel.style.display = tab === 'certificates' ? '' : 'none';
     teachersPanel.style.display = tab === 'teachers' ? '' : 'none';
     resourcesPanel.style.display = tab === 'resources' ? '' : 'none';
+    coursesPanel.style.display   = tab === 'courses'   ? '' : 'none';
   }
 
   // ===== TAB SWITCH =====
@@ -626,6 +630,7 @@ document.querySelectorAll('[data-count]').forEach(el => countObserver.observe(el
       else if (currentTab === 'certificates') loadAdminCerts();
       else if (currentTab === 'teachers') loadAdminTeachers();
       else if (currentTab === 'resources') loadAdminResources();
+      else if (currentTab === 'courses')   loadAdminCourses();
       else loadSubmissions();
     });
   });
@@ -1076,6 +1081,267 @@ document.querySelectorAll('[data-count]').forEach(el => countObserver.observe(el
     if (!confirm('Delete this resource?')) return;
     await SB.from('course_resources').delete().eq('id', id);
     fetchAdminResourcesList();
+  }
+
+  // ===== COURSES =====
+  var _courseNav = { view: 'courses', courseId: null, moduleId: null };
+  var _coursePrograms = ['all','coding-on-wheels','lawgic','dreamcatchers','changemakers','eko-warriors','we-women-empowerment','organ-donation-on-wheels','launchpad','pawtection-force','global-human-rights-front','cross-connect-legal-aid'];
+
+  function _inp(id, ph, type) { type = type || 'text'; return '<input id="' + id + '" type="' + type + '" placeholder="' + ph + '" style="width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:var(--bg);box-sizing:border-box;">'; }
+  function _sel(id, opts) { return '<select id="' + id + '" style="width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:var(--bg);">' + opts + '</select>'; }
+  function _lbl(txt) { return '<label style="font-size:11px;color:var(--ink-3);display:block;margin-bottom:4px;">' + txt + '</label>'; }
+  function _card(inner) { return '<div style="background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;">' + inner + '</div>'; }
+  function _breadcrumb(parts) {
+    return '<div style="font-family:var(--font-mono);font-size:10px;letter-spacing:1px;color:var(--ink-3);margin-bottom:18px;">'
+      + parts.map(function(p, i) {
+          return i < parts.length - 1
+            ? '<span style="cursor:pointer;color:var(--accent);" onclick="' + p.fn + '">' + p.label + '</span> › '
+            : '<span>' + p.label + '</span>';
+        }).join('')
+      + '</div>';
+  }
+
+  function loadAdminCourses() {
+    _courseNav = { view: 'courses', courseId: null, moduleId: null };
+    _renderCoursesView();
+  }
+
+  async function _renderCoursesView() {
+    var progOpts = _coursePrograms.map(function(p){ return '<option value="' + p + '">' + p + '</option>'; }).join('');
+    coursesPanel.innerHTML = _breadcrumb([{ label: 'Courses' }])
+      + '<h2 style="font-size:22px;margin:0 0 18px;">Courses</h2>'
+      + _card('<p style="font-family:var(--font-mono);font-size:10px;letter-spacing:1.2px;color:var(--ink-3);margin:0 0 14px;">CREATE COURSE</p>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
+        + '<div>' + _lbl('TITLE') + _inp('c-title','e.g. Python for Beginners') + '</div>'
+        + '<div>' + _lbl('PROGRAM') + _sel('c-program', progOpts) + '</div>'
+        + '<div style="grid-column:1/-1;">' + _lbl('DESCRIPTION') + _inp('c-desc','Short description') + '</div>'
+        + '<div>' + _lbl('CERT THRESHOLD (%) — minimum quiz score to earn certificate') + _inp('c-thresh','70','number') + '</div>'
+        + '<div style="display:flex;align-items:flex-end;"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;"><input type="checkbox" id="c-pub" checked> Published</label></div>'
+        + '</div>'
+        + '<button onclick="_createCourse()" class="btn btn--accent" style="margin-top:12px;padding:10px 22px;">Create Course</button>'
+        + '<span id="c-msg" style="font-size:12px;margin-left:12px;"></span>')
+      + '<div id="courses-list"><p style="color:var(--ink-3);text-align:center;padding:30px 0;">Loading...</p></div>';
+    _fetchCoursesList();
+  }
+
+  async function _createCourse() {
+    var title = (document.getElementById('c-title').value || '').trim();
+    var msg = document.getElementById('c-msg');
+    if (!title) { msg.textContent = 'Title required.'; msg.style.color = 'crimson'; return; }
+    msg.textContent = 'Saving...'; msg.style.color = 'var(--ink-3)';
+    var thresh = parseInt(document.getElementById('c-thresh').value) || 70;
+    var { error } = await SB.from('courses').insert({
+      title, description: document.getElementById('c-desc').value.trim(),
+      program: document.getElementById('c-program').value,
+      cert_threshold: Math.min(100, Math.max(1, thresh)),
+      is_published: document.getElementById('c-pub').checked,
+    });
+    if (error) { msg.textContent = 'Error: ' + error.message; msg.style.color = 'crimson'; return; }
+    msg.textContent = 'Created!'; msg.style.color = 'var(--accent)';
+    document.getElementById('c-title').value = '';
+    document.getElementById('c-desc').value = '';
+    _fetchCoursesList();
+  }
+
+  async function _fetchCoursesList() {
+    var el = document.getElementById('courses-list');
+    if (!el) return;
+    var { data } = await SB.from('courses').select('*').order('created_at', { ascending: false });
+    if (!data || !data.length) { el.innerHTML = '<p style="color:var(--ink-3);text-align:center;padding:30px 0;">No courses yet.</p>'; return; }
+    el.innerHTML = '<p style="font-family:var(--font-mono);font-size:10px;letter-spacing:1.2px;color:var(--ink-3);margin:0 0 12px;">' + data.length + ' COURSES</p>'
+      + data.map(function(c) {
+          var badge = c.is_published ? '<span style="background:#dcfce7;color:#166534;font-size:10px;padding:2px 8px;border-radius:99px;font-weight:700;">LIVE</span>' : '<span style="background:#fef3c7;color:#92400e;font-size:10px;padding:2px 8px;border-radius:99px;font-weight:700;">DRAFT</span>';
+          return '<div style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--paper);border:1px solid var(--line);border-radius:12px;margin-bottom:8px;cursor:pointer;" onclick="_openCourse(\'' + c.id + '\')">'
+            + '<div style="flex:1;"><div style="font-weight:600;font-size:14px;">' + esc(c.title) + '</div>'
+            + '<div style="font-size:11px;color:var(--ink-3);">' + esc(c.program) + ' · cert threshold: ' + c.cert_threshold + '%</div></div>'
+            + badge
+            + '<span style="font-size:18px;color:var(--ink-3);">›</span></div>';
+        }).join('');
+  }
+
+  async function _openCourse(courseId) {
+    _courseNav = { view: 'course', courseId: courseId, moduleId: null };
+    var { data: course } = await SB.from('courses').select('*').eq('id', courseId).single();
+    var { data: modules } = await SB.from('course_modules').select('*').eq('course_id', courseId).order('module_number', { ascending: true });
+    modules = modules || [];
+    coursesPanel.innerHTML = _breadcrumb([
+        { label: 'Courses', fn: 'loadAdminCourses()' },
+        { label: esc(course.title) }
+      ])
+      + '<h2 style="font-size:22px;margin:0 0 4px;">' + esc(course.title) + '</h2>'
+      + '<p style="font-size:13px;color:var(--ink-3);margin:0 0 18px;">Program: ' + esc(course.program) + ' · Cert threshold: <strong>' + course.cert_threshold + '%</strong></p>'
+      + _card('<p style="font-family:var(--font-mono);font-size:10px;letter-spacing:1.2px;color:var(--ink-3);margin:0 0 12px;">ADD MODULE</p>'
+        + '<div style="display:grid;grid-template-columns:60px 1fr;gap:10px;">'
+        + '<div>' + _lbl('MODULE #') + _inp('m-num', String(modules.length + 1), 'number') + '</div>'
+        + '<div>' + _lbl('MODULE TITLE') + _inp('m-title', 'e.g. Module 1: First Programs') + '</div>'
+        + '<div style="grid-column:1/-1;">' + _lbl('DESCRIPTION (optional)') + _inp('m-desc', 'What this module covers') + '</div>'
+        + '</div>'
+        + '<button onclick="_createModule(\'' + courseId + '\')" class="btn btn--accent" style="margin-top:12px;padding:10px 22px;">Add Module</button>'
+        + '<span id="m-msg" style="font-size:12px;margin-left:12px;"></span>')
+      + '<div id="modules-list">'
+      + (modules.length ? modules.map(function(m) {
+            return '<div style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--paper);border:1px solid var(--line);border-radius:12px;margin-bottom:8px;cursor:pointer;" onclick="_openModule(\'' + courseId + '\',\'' + m.id + '\')">'
+              + '<div style="width:36px;height:36px;background:var(--accent);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;">' + m.module_number + '</div>'
+              + '<div style="flex:1;"><div style="font-weight:600;font-size:14px;">' + esc(m.title) + '</div><div style="font-size:11px;color:var(--ink-3);">' + esc(m.description || '') + '</div></div>'
+              + '<button onclick="event.stopPropagation();_deleteModule(\'' + m.id + '\',\'' + courseId + '\')" style="background:none;border:1px solid #fca5a5;color:crimson;border-radius:8px;padding:5px 10px;font-size:11px;">Delete</button>'
+              + '<span style="font-size:18px;color:var(--ink-3);">›</span></div>';
+          }).join('')
+        : '<p style="color:var(--ink-3);text-align:center;padding:20px 0;">No modules yet. Add one above.</p>')
+      + '</div>';
+  }
+
+  async function _createModule(courseId) {
+    var title = (document.getElementById('m-title').value || '').trim();
+    var msg = document.getElementById('m-msg');
+    if (!title) { msg.textContent = 'Title required.'; msg.style.color = 'crimson'; return; }
+    msg.textContent = 'Saving...'; msg.style.color = 'var(--ink-3)';
+    var { error } = await SB.from('course_modules').insert({
+      course_id: courseId,
+      title,
+      description: document.getElementById('m-desc').value.trim(),
+      module_number: parseInt(document.getElementById('m-num').value) || 1,
+      is_published: true,
+    });
+    if (error) { msg.textContent = 'Error: ' + error.message; msg.style.color = 'crimson'; return; }
+    msg.textContent = 'Added!'; msg.style.color = 'var(--accent)';
+    _openCourse(courseId);
+  }
+
+  async function _deleteModule(moduleId, courseId) {
+    if (!confirm('Delete module and all its resources/questions?')) return;
+    await SB.from('course_modules').delete().eq('id', moduleId);
+    _openCourse(courseId);
+  }
+
+  async function _openModule(courseId, moduleId) {
+    _courseNav = { view: 'module', courseId, moduleId };
+    var [{ data: course }, { data: mod }, { data: resources }, { data: questions }] = await Promise.all([
+      SB.from('courses').select('id,title').eq('id', courseId).single(),
+      SB.from('course_modules').select('*').eq('id', moduleId).single(),
+      SB.from('course_resources').select('*').eq('module_id', moduleId).order('sort_order'),
+      SB.from('module_questions').select('*').eq('module_id', moduleId).order('sort_order'),
+    ]);
+    resources = resources || []; questions = questions || [];
+
+    var driveHint = '<span style="font-size:10px;color:var(--ink-3);">Paste full Google Drive share URL or just the file ID</span>';
+    var optInputs = [0,1,2,3].map(function(i) {
+      return '<div>' + _lbl('OPTION ' + ['A','B','C','D'][i] + (i === 0 ? ' (mark correct below)' : '')) + _inp('q-opt-' + i, 'Option ' + ['A','B','C','D'][i]) + '</div>';
+    }).join('');
+
+    coursesPanel.innerHTML = _breadcrumb([
+        { label: 'Courses', fn: 'loadAdminCourses()' },
+        { label: esc(course.title), fn: '_openCourse(\'' + courseId + '\')' },
+        { label: 'Module ' + mod.module_number + ': ' + esc(mod.title) }
+      ])
+      + '<h2 style="font-size:20px;margin:0 0 18px;">Module ' + mod.module_number + ': ' + esc(mod.title) + '</h2>'
+
+      /* Resources */
+      + '<h3 style="font-size:14px;font-weight:700;letter-spacing:.5px;margin:0 0 12px;">VIDEOS &amp; PDFs</h3>'
+      + _card('<p style="font-family:var(--font-mono);font-size:10px;letter-spacing:1.2px;color:var(--ink-3);margin:0 0 12px;">ADD RESOURCE</p>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
+        + '<div>' + _lbl('TITLE') + _inp('r-title','e.g. Intro Video') + '</div>'
+        + '<div>' + _lbl('TYPE') + _sel('r-type','<option value="video">Video</option><option value="pdf">PDF</option><option value="doc">Document</option>') + '</div>'
+        + '<div style="grid-column:1/-1;">' + _lbl('GOOGLE DRIVE FILE ID / URL') + _inp('r-drive','Paste full share link or file ID') + driveHint + '</div>'
+        + '<div>' + _lbl('DESCRIPTION') + _inp('r-desc','Short description') + '</div>'
+        + '<div>' + _lbl('SORT ORDER') + _inp('r-sort','0','number') + '</div>'
+        + '</div>'
+        + '<button onclick="_addModuleResource(\'' + moduleId + '\',\'' + courseId + '\')" class="btn btn--accent" style="margin-top:12px;padding:10px 22px;">Add Resource</button>'
+        + '<span id="r-msg" style="font-size:12px;margin-left:12px;"></span>')
+      + '<div id="mod-res-list" style="margin-bottom:24px;">'
+      + (resources.length ? resources.map(function(r) {
+            var icon = r.resource_type === 'video' ? '🎬' : r.resource_type === 'pdf' ? '📄' : '📋';
+            return '<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--paper);border:1px solid var(--line);border-radius:12px;margin-bottom:8px;">'
+              + '<div style="font-size:22px;">' + icon + '</div>'
+              + '<div style="flex:1;"><div style="font-weight:600;font-size:13px;">' + esc(r.title) + '</div>'
+              + '<div style="font-size:11px;color:var(--ink-3);">ID: ' + esc(r.drive_file_id) + '</div></div>'
+              + '<button onclick="_deleteResource(\'' + r.id + '\',\'' + courseId + '\',\'' + moduleId + '\')" style="background:none;border:1px solid #fca5a5;color:crimson;border-radius:8px;padding:5px 10px;font-size:11px;">Delete</button>'
+              + '</div>';
+          }).join('')
+        : '<p style="color:var(--ink-3);font-size:13px;padding:12px 0;">No resources yet.</p>')
+      + '</div>'
+
+      /* Quiz Questions */
+      + '<h3 style="font-size:14px;font-weight:700;letter-spacing:.5px;margin:0 0 12px;">QUIZ QUESTIONS</h3>'
+      + _card('<p style="font-family:var(--font-mono);font-size:10px;letter-spacing:1.2px;color:var(--ink-3);margin:0 0 12px;">ADD QUESTION</p>'
+        + '<div>' + _lbl('QUESTION TEXT') + _inp('q-text','e.g. What does print() do?') + '</div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">' + optInputs + '</div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">'
+        + '<div>' + _lbl('CORRECT ANSWER') + _sel('q-ans','<option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option>') + '</div>'
+        + '<div>' + _lbl('SORT ORDER') + _inp('q-sort','0','number') + '</div>'
+        + '</div>'
+        + '<div style="margin-top:10px;">' + _lbl('EXPLANATION (shown after answering)') + _inp('q-exp','Why is this the correct answer?') + '</div>'
+        + '<button onclick="_addQuestion(\'' + moduleId + '\',\'' + courseId + '\')" class="btn btn--accent" style="margin-top:12px;padding:10px 22px;">Add Question</button>'
+        + '<span id="q-msg" style="font-size:12px;margin-left:12px;"></span>')
+      + '<div id="mod-q-list">'
+      + (questions.length ? questions.map(function(q, qi) {
+            var opts = Array.isArray(q.options) ? q.options : [];
+            return '<div style="padding:14px 16px;background:var(--paper);border:1px solid var(--line);border-radius:12px;margin-bottom:8px;">'
+              + '<div style="font-weight:600;font-size:13px;margin-bottom:8px;">' + (qi+1) + '. ' + esc(q.question_text) + '</div>'
+              + opts.map(function(o, i) {
+                  return '<div style="font-size:12px;color:' + (i === q.correct_answer ? 'var(--green)' : 'var(--ink-3)') + ';margin-bottom:2px;">'
+                    + ['A','B','C','D'][i] + '. ' + esc(o) + (i === q.correct_answer ? ' ✓' : '') + '</div>';
+                }).join('')
+              + (q.explanation ? '<div style="font-size:11px;color:var(--ink-3);margin-top:6px;font-style:italic;">Explanation: ' + esc(q.explanation) + '</div>' : '')
+              + '<button onclick="_deleteQuestion(\'' + q.id + '\',\'' + courseId + '\',\'' + moduleId + '\')" style="background:none;border:1px solid #fca5a5;color:crimson;border-radius:8px;padding:4px 10px;font-size:11px;margin-top:8px;">Delete</button>'
+              + '</div>';
+          }).join('')
+        : '<p style="color:var(--ink-3);font-size:13px;padding:12px 0;">No questions yet.</p>')
+      + '</div>';
+  }
+
+  async function _addModuleResource(moduleId, courseId) {
+    var title = (document.getElementById('r-title').value || '').trim();
+    var rawDrive = (document.getElementById('r-drive').value || '').trim();
+    var driveId = parseDriveId(rawDrive);
+    var msg = document.getElementById('r-msg');
+    if (!title || !driveId) { msg.textContent = 'Title and Drive ID required.'; msg.style.color = 'crimson'; return; }
+    msg.textContent = 'Saving...'; msg.style.color = 'var(--ink-3)';
+    var { error } = await SB.from('course_resources').insert({
+      module_id: moduleId,
+      title,
+      description: document.getElementById('r-desc').value.trim(),
+      resource_type: document.getElementById('r-type').value,
+      drive_file_id: driveId,
+      sort_order: parseInt(document.getElementById('r-sort').value) || 0,
+      audience: 'kids',
+      program: 'all',
+      is_published: true,
+    });
+    if (error) { msg.textContent = 'Error: ' + error.message; msg.style.color = 'crimson'; return; }
+    msg.textContent = 'Added!'; msg.style.color = 'var(--accent)';
+    _openModule(courseId, moduleId);
+  }
+
+  async function _deleteResource(resId, courseId, moduleId) {
+    if (!confirm('Delete this resource?')) return;
+    await SB.from('course_resources').delete().eq('id', resId);
+    _openModule(courseId, moduleId);
+  }
+
+  async function _addQuestion(moduleId, courseId) {
+    var text = (document.getElementById('q-text').value || '').trim();
+    var msg = document.getElementById('q-msg');
+    if (!text) { msg.textContent = 'Question text required.'; msg.style.color = 'crimson'; return; }
+    var opts = [0,1,2,3].map(function(i){ return (document.getElementById('q-opt-' + i).value || '').trim(); });
+    if (opts.some(function(o){ return !o; })) { msg.textContent = 'All 4 options required.'; msg.style.color = 'crimson'; return; }
+    msg.textContent = 'Saving...'; msg.style.color = 'var(--ink-3)';
+    var { error } = await SB.from('module_questions').insert({
+      module_id: moduleId,
+      question_text: text,
+      options: opts,
+      correct_answer: parseInt(document.getElementById('q-ans').value) || 0,
+      explanation: document.getElementById('q-exp').value.trim(),
+      sort_order: parseInt(document.getElementById('q-sort').value) || 0,
+    });
+    if (error) { msg.textContent = 'Error: ' + error.message; msg.style.color = 'crimson'; return; }
+    msg.textContent = 'Added!'; msg.style.color = 'var(--accent)';
+    _openModule(courseId, moduleId);
+  }
+
+  async function _deleteQuestion(qId, courseId, moduleId) {
+    if (!confirm('Delete this question?')) return;
+    await SB.from('module_questions').delete().eq('id', qId);
+    _openModule(courseId, moduleId);
   }
 
   // ===== INIT =====

@@ -836,24 +836,54 @@ var QUIZ_MODULES = [
   { id: 5, title: 'Module 5: Lists & Loops', unlocked: false, questions: [] },
 ];
 
-var _quizScores = {};   /* { moduleId: { score, total, passed } } */
-var _activeQuiz = null; /* { mod, qIndex, answers, correct } */
+var _quizScores = {};          /* { moduleId: { score, total, passed } } */
+var _activeQuiz = null;        /* { mod, qIndex, answers, correct } */
+var _kidsActiveCourse  = null; /* loaded course from Supabase */
+var _kidsModuleProgress = {};  /* { supabaseModuleId: { score, total, completed } } */
 
 function loadTestsSection() {
   var listEl = document.getElementById('quiz-module-list');
   if (!listEl) return;
   listEl.innerHTML = QUIZ_MODULES.map(function(mod) {
     var s = _quizScores[mod.id];
+    if (!s && mod.supabaseId && _kidsModuleProgress[mod.supabaseId]) {
+      var p = _kidsModuleProgress[mod.supabaseId];
+      s = { score: p.quiz_score, total: p.quiz_total, passed: p.completed };
+    }
     var scoreTxt = s ? s.score + '/' + s.total + ' · ' + (s.passed ? '✓ Passed' : 'Try again') : (mod.unlocked ? 'Not attempted' : 'Locked');
     var numClass = s && s.passed ? 'done' : (mod.unlocked ? 'current' : '');
+    var qCount = mod.questions.length || (mod.supabaseId ? '?' : '0');
     return '<div class="mod-quiz-card' + (mod.unlocked ? '' : ' locked') + '" '
-      + (mod.unlocked ? 'onclick="startQuiz(' + mod.id + ')"' : '') + '>'
+      + (mod.unlocked ? 'onclick="_startQuizDynamic(' + mod.id + ')"' : '') + '>'
       + '<div class="mod-num ' + numClass + '">' + mod.id + '</div>'
       + '<div><p class="mod-quiz-title">' + escK(mod.title) + '</p>'
-      + '<p class="mod-quiz-meta">' + mod.questions.length + ' questions · Multiple choice</p></div>'
+      + '<p class="mod-quiz-meta">' + qCount + ' questions · Multiple choice</p></div>'
       + '<div class="mod-quiz-score">' + escK(scoreTxt) + '</div>'
       + '</div>';
   }).join('');
+}
+
+async function _startQuizDynamic(modId) {
+  var mod = QUIZ_MODULES.find(function(m) { return m.id === modId; });
+  if (!mod || !mod.unlocked) return;
+  /* Lazy-load questions from Supabase if this is a dynamic module */
+  if (mod.supabaseId && !mod.questions.length && _kidsSB) {
+    var listEl = document.getElementById('quiz-module-list');
+    if (listEl) listEl.innerHTML = '<div class="spinner"></div>';
+    var res = await _kidsSB.from('module_questions')
+      .select('*').eq('module_id', mod.supabaseId).order('sort_order');
+    if (res.data && res.data.length) {
+      mod.questions = res.data.map(function(q) {
+        return { q: q.question_text, opts: Array.isArray(q.options) ? q.options : [], ans: q.correct_answer, exp: q.explanation || '' };
+      });
+    }
+  }
+  if (!mod.questions.length) {
+    loadTestsSection();
+    alert('No questions available for this module yet.');
+    return;
+  }
+  startQuiz(modId);
 }
 
 function startQuiz(modId) {
@@ -926,21 +956,49 @@ function showQuizResults() {
   var q = _activeQuiz;
   var total = q.mod.questions.length;
   var pct = Math.round((q.correct / total) * 100);
-  var passed = q.correct >= Math.ceil(total * 0.6);
+  var thresh = _kidsActiveCourse ? _kidsActiveCourse.cert_threshold : 60;
+  var passed = pct >= thresh;
   _quizScores[q.mod.id] = { score: q.correct, total: total, passed: passed };
-  var msg = pct === 100 ? '🏆 Perfect score!' : pct >= 80 ? '🌟 Excellent work!' : pct >= 60 ? '✅ Good job, you passed!' : '📚 Keep practising!';
-  var sub = passed ? 'You passed this module quiz.' : 'You need ' + Math.ceil(total * 0.6) + '/' + total + ' to pass. Try again!';
+  /* Save progress to Supabase */
+  if (!_kidsIsDemo && _kidsSB && _kidsUid && q.mod.supabaseId) {
+    _kidsSB.from('user_module_progress').upsert({
+      user_id: _kidsUid,
+      module_id: q.mod.supabaseId,
+      course_id: q.mod.courseId,
+      quiz_score: q.correct,
+      quiz_total: total,
+      completed: passed,
+      completed_at: passed ? new Date().toISOString() : null,
+    }, { onConflict: 'user_id,module_id' }).then(function() {
+      if (q.mod.supabaseId) _kidsModuleProgress[q.mod.supabaseId] = { quiz_score: q.correct, quiz_total: total, completed: passed };
+      _checkCourseCompletion();
+    });
+  }
+  var msgTxt = pct === 100 ? '🏆 Perfect score!' : pct >= 80 ? '🌟 Excellent work!' : pct >= thresh ? '✅ Good job, you passed!' : '📚 Keep practising!';
+  var sub = passed ? 'You passed this module. Threshold: ' + thresh + '%.' : 'You need ' + thresh + '% to pass. Try again!';
   var eng = document.getElementById('quiz-engine');
   eng.innerHTML = '<div class="quiz-result">'
     + '<div class="quiz-result-score">' + q.correct + '/' + total + '</div>'
     + '<div class="quiz-result-label">' + pct + '% correct</div>'
-    + '<p class="quiz-result-msg">' + msg + '</p>'
+    + '<p class="quiz-result-msg">' + msgTxt + '</p>'
     + '<p class="quiz-result-sub">' + escK(sub) + '</p>'
     + '<div class="quiz-result-actions">'
-    + '<button class="code-submit-btn" style="width:auto;padding:12px 24px;" onclick="startQuiz(' + q.mod.id + ')">Retry Quiz</button>'
+    + '<button class="code-submit-btn" style="width:auto;padding:12px 24px;" onclick="_startQuizDynamic(' + q.mod.id + ')">Retry Quiz</button>'
     + '<button class="code-submit-btn" style="width:auto;padding:12px 24px;background:var(--paper-2);color:var(--ink);" onclick="exitQuiz()">All Modules</button>'
     + '</div>'
     + '</div>';
+}
+
+function _checkCourseCompletion() {
+  if (!_kidsActiveCourse) return;
+  var thresh = _kidsActiveCourse.cert_threshold || 70;
+  var allDone = QUIZ_MODULES.length > 0 && QUIZ_MODULES.every(function(mod) {
+    var prog = mod.supabaseId ? _kidsModuleProgress[mod.supabaseId] : null;
+    var local = _quizScores[mod.id];
+    return (prog && prog.completed) || (local && local.passed);
+  });
+  var banner = document.getElementById('cert-ready-banner');
+  if (banner) banner.style.display = allDone ? '' : 'none';
 }
 
 function exitQuiz() {
@@ -950,25 +1008,54 @@ function exitQuiz() {
   loadTestsSection();
 }
 
-function renderCertificate(DONE_MODULES, TOTAL_MODULES) {
+function renderCertificate(DONE_MODULES, TOTAL_MODULES, thresh, overallPct) {
   var wrap = document.getElementById('cert-wrap');
   if (!wrap) return;
-  var pct = Math.round((DONE_MODULES / TOTAL_MODULES) * 100);
-  if (DONE_MODULES < TOTAL_MODULES) {
+  var modPct = TOTAL_MODULES > 0 ? Math.round((DONE_MODULES / TOTAL_MODULES) * 100) : 0;
+  thresh = thresh || 60;
+  var certEarned = DONE_MODULES >= TOTAL_MODULES && (overallPct === undefined || overallPct >= thresh);
+  if (!certEarned) {
+    var scoreInfo = overallPct !== undefined
+      ? '<p style="font-size:13px;color:var(--ink-3);margin:4px 0 0;">Overall quiz score: <strong>' + overallPct + '%</strong> (need ' + thresh + '% to unlock certificate)</p>'
+      : '<p style="font-size:13px;color:var(--ink-3);margin:4px 0 0;">Pass all module quizzes with ' + thresh + '%+ to unlock your certificate.</p>';
     wrap.innerHTML = '<div class="cert-progress-wrap">'
-      + '<p style="font-size:14px;font-weight:600;margin:0 0 4px;">Modules completed: ' + DONE_MODULES + ' of ' + TOTAL_MODULES + '</p>'
-      + '<p style="font-size:13px;color:var(--ink-3);margin:0;">Complete all ' + TOTAL_MODULES + ' modules to unlock your certificate.</p>'
-      + '<div class="cert-bar"><div class="cert-bar-fill" style="width:' + pct + '%"></div></div>'
-      + '<p style="font-family:var(--font-mono);font-size:10px;color:var(--ink-3);margin:0;">' + pct + '% complete</p>'
+      + '<p style="font-size:14px;font-weight:600;margin:0 0 4px;">Modules passed: ' + DONE_MODULES + ' of ' + TOTAL_MODULES + '</p>'
+      + scoreInfo
+      + '<div class="cert-bar"><div class="cert-bar-fill" style="width:' + modPct + '%"></div></div>'
+      + '<p style="font-family:var(--font-mono);font-size:10px;color:var(--ink-3);margin:0;">' + modPct + '% modules complete</p>'
       + '</div>';
   } else {
     renderCertCard(wrap);
   }
 }
 
-function loadCertificate() {
+async function loadCertificate() {
   if (_kidsIsDemo) { renderCertificate(8, 8); return; }
   if (!_kidsSB) return;
+  /* If a Supabase course is loaded, use module completion for certificate */
+  if (_kidsActiveCourse && QUIZ_MODULES.length) {
+    var total = QUIZ_MODULES.length;
+    var thresh = _kidsActiveCourse.cert_threshold || 70;
+    var passed = QUIZ_MODULES.filter(function(mod) {
+      var prog = mod.supabaseId ? _kidsModuleProgress[mod.supabaseId] : null;
+      var local = _quizScores[mod.id];
+      return (prog && prog.completed) || (local && local.passed);
+    }).length;
+    /* Also verify overall score meets threshold */
+    var totalScore = 0, totalQs = 0;
+    QUIZ_MODULES.forEach(function(mod) {
+      var prog = mod.supabaseId ? _kidsModuleProgress[mod.supabaseId] : null;
+      var local = _quizScores[mod.id];
+      var s = prog || local;
+      if (s) { totalScore += (s.quiz_score || s.score || 0); totalQs += (s.quiz_total || s.total || 0); }
+    });
+    var overallPct = totalQs > 0 ? Math.round(totalScore / totalQs * 100) : 0;
+    var certEarned = passed === total && overallPct >= thresh;
+    if (certEarned) { renderCertificate(total, total); }
+    else { renderCertificate(passed, total, thresh, overallPct); }
+    return;
+  }
+  /* Fallback: count approved code submissions */
   _kidsSB.from('submissions')
     .select('id', { count: 'exact', head: true })
     .eq('submitter_user_id', _kidsUid)
@@ -1084,6 +1171,25 @@ function _kidsSetupUI(name, initial, mentorName) {
   _handleCodeSubmit();
 }
 
+async function initCourseFromSupabase() {
+  if (!_kidsSB || _kidsIsDemo) return;
+  var cRes = await _kidsSB.from('courses').select('*').eq('program','coding-on-wheels').eq('is_published',true).limit(1);
+  if (!cRes.data || !cRes.data.length) return;
+  var course = cRes.data[0];
+  _kidsActiveCourse = course;
+  var mRes = await _kidsSB.from('course_modules').select('*').eq('course_id',course.id).eq('is_published',true).order('module_number');
+  if (!mRes.data || !mRes.data.length) return;
+  if (_kidsUid) {
+    var pRes = await _kidsSB.from('user_module_progress').select('*').eq('user_id',_kidsUid).eq('course_id',course.id);
+    (pRes.data || []).forEach(function(p){ _kidsModuleProgress[p.module_id] = p; });
+  }
+  QUIZ_MODULES = mRes.data.map(function(m, i) {
+    return { id: i+1, supabaseId: m.id, courseId: course.id, title: m.title, unlocked: true, questions: [] };
+  });
+  if (document.getElementById('quiz-module-list')) loadTestsSection();
+  _checkCourseCompletion();
+}
+
 window.addEventListener('load', async function() {
   var _demo = null;
   try { _demo = JSON.parse(sessionStorage.getItem('btc-demo-session') || 'null'); } catch(_) {}
@@ -1123,6 +1229,9 @@ window.addEventListener('load', async function() {
   if (!profile.profile_complete || !profile.father_name) {
     _showKidsReg(name !== session.user.email.split('@')[0] ? name : '');
   }
+
+  /* Load dynamic course from Supabase (non-blocking) */
+  initCourseFromSupabase();
 
   document.getElementById('signout-btn').addEventListener('click', async function() {
     await SB.auth.signOut();

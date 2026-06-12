@@ -391,6 +391,28 @@
             </div>
           </div>
 
+          <!-- SCHEDULE LIVE CALL -->
+          <div class="card" style="margin-top:16px;" id="schedule-call-card">
+            <div class="card-hed"><h2>Schedule a Live Call</h2></div>
+            <p style="font-size:13px;color:var(--ink-3);margin:0 0 14px;">Add your Google Meet link — it will appear in the kids' Video Calls section.</p>
+            <div style="display:grid;gap:10px;">
+              <div><label style="font-size:11px;color:var(--ink-3);display:block;margin-bottom:4px;">SESSION TITLE</label>
+                <input id="sc-title" placeholder="e.g. Python Loops Workshop" style="width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:var(--bg);box-sizing:border-box;"></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div><label style="font-size:11px;color:var(--ink-3);display:block;margin-bottom:4px;">DATE</label>
+                  <input id="sc-date" type="date" style="width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:var(--bg);box-sizing:border-box;"></div>
+                <div><label style="font-size:11px;color:var(--ink-3);display:block;margin-bottom:4px;">TIME</label>
+                  <input id="sc-time" placeholder="e.g. 4:00 PM" style="width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:var(--bg);box-sizing:border-box;"></div>
+              </div>
+              <div><label style="font-size:11px;color:var(--ink-3);display:block;margin-bottom:4px;">GOOGLE MEET LINK</label>
+                <input id="sc-link" type="url" placeholder="https://meet.google.com/xxx-xxxx-xxx" style="width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:var(--bg);box-sizing:border-box;"></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;margin-top:12px;">
+              <button onclick="scheduleVolCall()" class="quick-act" style="margin:0;">Schedule Call</button>
+              <span id="sc-msg" style="font-size:12px;color:var(--accent);"></span>
+            </div>
+          </div>
+
           <div class="card" style="margin-top:16px;">
             <div class="card-hed"><h2>Quick Actions</h2></div>
             <div style="display:flex;flex-wrap:wrap;gap:10px;">
@@ -1269,6 +1291,38 @@ async function _submitVolReg() {
   </button>
 </nav>
 <script>
+/* ── SCHEDULE LIVE CALL ── */
+async function scheduleVolCall() {
+  var title = (document.getElementById('sc-title').value || '').trim();
+  var date  = (document.getElementById('sc-date').value || '').trim();
+  var time  = (document.getElementById('sc-time').value || '').trim();
+  var link  = (document.getElementById('sc-link').value || '').trim();
+  var msg   = document.getElementById('sc-msg');
+  if (!title || !date || !link) { msg.textContent = 'Title, date and Meet link required.'; msg.style.color = 'crimson'; return; }
+  if (!link.startsWith('http')) { msg.textContent = 'Enter a valid URL.'; msg.style.color = 'crimson'; return; }
+  msg.textContent = 'Saving...'; msg.style.color = 'var(--ink-3)';
+  if (_isDemo) { msg.textContent = 'Scheduled! (demo mode)'; msg.style.color = 'var(--accent)'; return; }
+  if (!_SB || !_uid) { msg.textContent = 'Not logged in.'; msg.style.color = 'crimson'; return; }
+  var volName = document.getElementById('welcome-name') ? document.getElementById('welcome-name').textContent : 'Volunteer';
+  var { error } = await _SB.from('video_calls').insert({
+    created_by: _uid,
+    title: title,
+    teacher: volName,
+    call_date: date,
+    call_time: time || null,
+    meet_link: link,
+    program_slug: 'coding-on-wheels',
+    target_roles: ['kid'],
+    status: 'scheduled',
+  });
+  if (error) { msg.textContent = 'Error: ' + error.message; msg.style.color = 'crimson'; return; }
+  msg.textContent = 'Call scheduled! Students will see it in their portal.'; msg.style.color = 'var(--accent)';
+  document.getElementById('sc-title').value = '';
+  document.getElementById('sc-date').value = '';
+  document.getElementById('sc-time').value = '';
+  document.getElementById('sc-link').value = '';
+}
+
 /* ── DRIVE VIEWER ── */
 function openVolDriveViewer(fileId, title) {
   document.getElementById('vol-drive-title').textContent = title;

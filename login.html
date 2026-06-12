@@ -517,14 +517,18 @@ window.btcToast = function(msg, type, dur) {
     return String(Math.floor(100000 + Math.random() * 900000));
   }
 
-  /* Demo bypass: 9999999999 → OTP always 999999, no SMS sent */
-  var DEMO_PHONE = '9999999999';
-  var DEMO_OTP   = '999999';
+  /* Hard-coded demo accounts — OTP always 999999, no SMS sent
+     9999999991 → kid portal   9999999992 → volunteer portal   9999999999 → admin */
+  var DEMO_OTP    = '999999';
+  var DEMO_PHONES = { '9999999991': 'kid', '9999999992': 'volunteer', '9999999999': 'admin' };
+  var DEMO_PHONE  = '9999999999'; /* kept for legacy checks */
+  function isDemoPhone(p) { return Object.prototype.hasOwnProperty.call(DEMO_PHONES, p); }
+  function demoRole(p)    { return DEMO_PHONES[p] || 'volunteer'; }
 
   /* Send OTP via Authkey.io DLT template (SID-based).
      Template: "Use {#otp#} as your OTP to access your {#company#}, OTP is confidential and valid for 5 mins" */
   async function sendAuthkeyOtp(phone, otp) {
-    if (phone === DEMO_PHONE) { _otp = DEMO_OTP; return; } /* demo mode — no SMS */
+    if (isDemoPhone(phone)) { _otp = DEMO_OTP; return; } /* demo mode — no SMS */
     var cfg = window.AUTHKEY_CONFIG;
     if (!cfg || !cfg.key) throw new Error('SMS not configured. Contact support@bthechange.in.');
     var url = 'https://api.authkey.io/request'
@@ -692,8 +696,8 @@ window.btcToast = function(msg, type, dur) {
       showErr('ls-otp-error', 'Incorrect OTP. Please try again.');
       return;
     }
-    /* Demo bypass — skip Supabase entirely */
-    if (_phone === DEMO_PHONE) { goToWelcome(_role || 'volunteer'); return; }
+    /* Demo bypass — skip Supabase entirely, route by demo phone number */
+    if (isDemoPhone(_phone)) { goToWelcome(demoRole(_phone)); return; }
 
     var sb = getSB();
     if (!sb || !_phone) { showErr('ls-otp-error', 'Session expired. Go back and try again.'); return; }
@@ -735,8 +739,9 @@ window.btcToast = function(msg, type, dur) {
     var next = p.get('next') || sessionStorage.getItem('btc-auth-next');
     sessionStorage.removeItem('btc-auth-next');
     if (next && next.startsWith('/') && !next.startsWith('//')) dest = next;
-    if (_phone === DEMO_PHONE) {
-      sessionStorage.setItem('btc-demo-session', JSON.stringify({ role: role, name: 'Demo User' }));
+    if (isDemoPhone(_phone)) {
+      var demoNames = { '9999999991': 'Demo Student', '9999999992': 'Demo Volunteer', '9999999999': 'Demo Admin' };
+      sessionStorage.setItem('btc-demo-session', JSON.stringify({ role: role, name: demoNames[_phone] || 'Demo User' }));
     }
     var msgs = { kid: 'Student Portal', volunteer: 'Volunteer Console', admin: 'Admin Console' };
     document.getElementById('ls-redirect-msg').textContent = 'Opening ' + (msgs[role] || 'your console') + '...';
