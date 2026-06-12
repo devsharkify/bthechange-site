@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Offline · B The Change</title>
+<meta name="theme-color" content="#1E3A6F" />
+<link rel="apple-touch-icon" href="assets/bthechange-logo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    font-family: 'Geist', system-ui, sans-serif;
+    background: #FAF9F6;
+    color: #1C1C1E;
+    display: flex; align-items: center; justify-content: center;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+    padding: 24px;
+  }
+  .wrap { max-width: 520px; text-align: center; }
+  .eyebrow {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px; letter-spacing: 1.6px; text-transform: uppercase;
+    color: #1E3A6F; font-weight: 700;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .eyebrow::before {
+    content: ''; width: 8px; height: 8px;
+    background: #1E3A6F; border-radius: 50%;
+  }
+  h1 {
+    font-size: clamp(40px, 7vw, 64px); line-height: 1; letter-spacing: -2px;
+    margin: 16px 0 12px; font-weight: 600;
+  }
+  h1 em {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-style: italic; font-weight: 400; color: #1E3A6F;
+  }
+  p {
+    font-family: 'Instrument Serif', Georgia, serif; font-style: italic;
+    font-size: 19px; line-height: 1.5;
+    color: #5C5C60;
+    margin: 0 0 28px; max-width: 44ch; margin-left: auto; margin-right: auto;
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: #1C1C1E; color: #FAF9F6;
+    padding: 14px 24px; border-radius: 999px;
+    font-weight: 600; font-size: 14px; text-decoration: none;
+    border: none; cursor: pointer;
+  }
+  .btn:hover { background: #1E3A6F; }
+  .btn .arrow {
+    font-family: 'Instrument Serif', Georgia, serif; font-style: italic;
+    font-size: 18px;
+  }
+  .links {
+    margin-top: 36px; padding-top: 24px;
+    border-top: 1px solid rgba(28,28,30,0.10);
+    font-family: 'Geist Mono', monospace; font-size: 11px;
+    letter-spacing: 0.6px; color: #5C5C60;
+  }
+  .links a {
+    color: #1E3A6F; text-decoration: none; font-weight: 700;
+  }
+  .links a + a { margin-left: 18px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">YOU'RE OFFLINE</div>
+  <h1>The signal <em>dropped.</em></h1>
+  <p>
+    No internet right now, but your last visit is saved. Try reconnecting and we'll bring everything back.
+  </p>
+  <button class="btn" onclick="location.reload()">
+    Try again <span class="arrow">→</span>
+  </button>
+  <div class="links">
+    Once you're back online: <a href="/index.html">Home</a><a href="/awards.html">Awards</a><a href="/about.html">About</a>
+  </div>
+</div>
+<script>
+  // Auto-retry when connection comes back
+  window.addEventListener('online', () => location.reload());
+</script>
+</body>
+</html>

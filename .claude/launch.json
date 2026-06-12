@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "bthechange-site",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-l", "4400", "."],
+      "port": 4400
+    }
+  ]
+}

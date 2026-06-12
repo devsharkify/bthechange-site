@@ -1,0 +1,1290 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#1E3A6F" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="Volunteer Console" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="mobile-web-app-capable" content="yes" />
+<link rel="manifest" href="../manifest.json" />
+<link rel="apple-touch-icon" sizes="180x180" href="../assets/apple-touch-icon.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="../assets/icon-192.png" />
+<title>Volunteer Console · B The Change</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script defer src="../assets/supabase-config.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  :root {
+    --paper: #FAF9F6; --paper-2: #F4F2EC; --ink: #1C1C1E; --ink-2: #2A2A2C;
+    --ink-3: #5C5C60; --mute: #8A8A8E; --line: rgba(28,28,30,.10);
+    --accent: #1E3A6F; --accent-2: #142951; --green: #2E8B57; --gold: #C5961A; --blue: #2B5DD9;
+    --font-sans: 'Geist', system-ui, sans-serif;
+    --font-mono: 'Geist Mono', ui-monospace, monospace;
+    --font-serif: 'Instrument Serif', Georgia, serif;
+    --radius: 14px;
+  }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); background: var(--paper-2); color: var(--ink); -webkit-font-smoothing: antialiased; line-height: 1.5; }
+
+  /* AUTH LOADING OVERLAY */
+  #auth-guard { position: fixed; inset: 0; background: var(--ink); display: flex; align-items: center; justify-content: center; z-index: 999; }
+  #auth-guard .spinner { width: 32px; height: 32px; border: 3px solid rgba(255,255,255,.12); border-top-color: #1E3A6F; border-radius: 50%; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  body.auth-ready #auth-guard { display: none; }
+
+  /* APP SHELL */
+  .app { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+  @media (max-width: 880px) { .app { grid-template-columns: 1fr; } }
+
+  /* SIDEBAR */
+  .sidebar { background: var(--ink); color: var(--paper); padding: 24px 18px; display: flex; flex-direction: column; gap: 4px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  @media (max-width: 880px) { .sidebar { position: fixed; top: 0; left: 0; right: 0; height: auto; flex-direction: row; overflow-x: auto; padding: 10px 12px; gap: 6px; z-index: 200; border-bottom: 1px solid rgba(255,255,255,.08); } }
+  .sb-brand { display: flex; align-items: center; gap: 10px; padding: 0 8px 18px; border-bottom: 1px solid rgba(255,255,255,.10); margin-bottom: 14px; flex-shrink: 0; }
+  @media (max-width: 880px) { .sb-brand { border-bottom: none; padding: 0; margin: 0; } }
+  .sb-brand-logo { width: 32px; height: 32px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
+  .sb-brand-name { font-weight: 600; font-size: 14px; line-height: 1.1; }
+  .sb-back { display: none; background: none; border: none; color: rgba(255,255,255,.7); cursor: pointer; padding: 4px 6px; border-radius: 7px; flex-shrink: 0; -webkit-tap-highlight-color: transparent; }
+  .sb-back:hover { background: rgba(255,255,255,.1); color: var(--paper); }
+  @media (max-width: 880px) { .sb-back { display: flex; align-items: center; margin-right: 2px; } }
+  /* REGISTRATION MODAL */
+  .reg-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.65); z-index: 900; display: flex; align-items: flex-end; justify-content: center; }
+  .reg-overlay.is-hidden { display: none; }
+  .reg-sheet { background: var(--paper); border-radius: 20px 20px 0 0; padding: 28px 20px 40px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; }
+  .reg-sheet h2 { font-size: 22px; font-weight: 700; margin: 0 0 4px; color: var(--ink); }
+  .reg-sheet p { font-size: 14px; color: var(--ink-3); margin: 0 0 20px; }
+  .reg-field { margin-bottom: 14px; }
+  .reg-label { display: block; font-size: 12px; font-weight: 600; letter-spacing: .6px; text-transform: uppercase; color: var(--ink-3); margin-bottom: 5px; }
+  .reg-input { width: 100%; padding: 11px 14px; border: 1.5px solid var(--line); border-radius: 10px; font-size: 15px; font-family: var(--font-sans); background: var(--paper); color: var(--ink); outline: none; }
+  .reg-input:focus { border-color: var(--accent); }
+  .reg-submit { width: 100%; padding: 14px; background: var(--accent); color: var(--paper); border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+  .reg-submit:disabled { opacity: .5; }
+  .reg-skip { display: block; text-align: center; font-size: 13px; color: var(--ink-3); margin-top: 12px; cursor: pointer; text-decoration: underline; }
+  .sb-brand-name small { display: block; font-family: var(--font-mono); font-size: 9px; letter-spacing: 1.4px; color: #9DB8E0; margin-top: 2px; }
+  @media (max-width: 880px) { .sb-brand-name { display: none; } }
+  .sb-nav { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+  @media (max-width: 880px) { .sb-nav { flex-direction: row; } }
+  .sb-link { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; color: rgba(255,255,255,.72); text-decoration: none; font-size: 13.5px; font-weight: 500; white-space: nowrap; transition: background .15s, color .15s; cursor: pointer; border: none; background: none; font-family: var(--font-sans); width: 100%; text-align: left; }
+  .sb-link:hover { background: rgba(255,255,255,.06); color: var(--paper); }
+  .sb-link.is-active { background: var(--accent); color: var(--paper); }
+  .sb-icon { width: 18px; height: 18px; flex-shrink: 0; }
+  .sb-divider { height: 1px; background: rgba(255,255,255,.08); margin: 12px 8px; }
+  @media (max-width: 880px) { .sb-divider { display: none; } }
+  .sb-foot { padding: 12px 8px; flex-shrink: 0; margin-top: auto; }
+  @media (max-width: 880px) { .sb-foot { display: none; } }
+  .sb-user { display: flex; align-items: center; gap: 10px; }
+  .sb-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-2)); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0; }
+  .sb-user-name { font-size: 13px; font-weight: 500; }
+  .sb-user-meta { font-family: var(--font-mono); font-size: 9.5px; color: rgba(255,255,255,.5); letter-spacing: .6px; }
+  .sb-signout { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding: 8px 12px; border-radius: 8px; color: rgba(255,255,255,.45); font-size: 12px; cursor: pointer; background: none; border: none; font-family: var(--font-sans); width: 100%; transition: background .15s, color .15s; }
+  .sb-signout:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.8); }
+
+  /* MAIN */
+  .main { padding: 32px 36px 64px; }
+  @media (max-width: 880px) { .main { padding-top: 80px; padding-bottom: 88px; } }
+  @media (max-width: 760px) { .main { padding-left: 20px; padding-right: 20px; } }
+  .page-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
+  .page-eyebrow { font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+  .page-title { font-size: clamp(28px, 4.5vw, 44px); line-height: 1.05; letter-spacing: -1.5px; margin: 6px 0 0; font-weight: 600; }
+  .page-title em { font-family: var(--font-serif); font-style: italic; font-weight: 400; color: var(--accent); }
+  .quick-act { display: inline-flex; align-items: center; gap: 8px; background: var(--ink); color: var(--paper); padding: 11px 18px; border-radius: 999px; text-decoration: none; font-size: 13.5px; font-weight: 500; border: none; cursor: pointer; font-family: var(--font-sans); transition: background .15s; }
+  .quick-act:hover { background: var(--accent); }
+
+  /* SECTIONS */
+  .vol-section { display: none; }
+  .vol-section.is-active { display: block; }
+
+  /* IMPACT BAR */
+  .impact-bar { background: var(--ink); color: var(--paper); border-radius: var(--radius); padding: 24px 28px; display: grid; grid-template-columns: repeat(4,1fr); gap: 24px; margin-bottom: 24px; position: relative; overflow: hidden; }
+  .impact-bar::before { content: ''; position: absolute; top: -60px; right: -60px; width: 220px; height: 220px; background: radial-gradient(circle, rgba(30,58,111,.32), transparent 70%); border-radius: 50%; }
+  @media (max-width: 760px) { .impact-bar { grid-template-columns: repeat(2,1fr); padding: 18px 20px; gap: 18px; } }
+  .impact-cell { position: relative; z-index: 1; }
+  .impact-num { font-family: var(--font-serif); font-style: italic; font-size: clamp(32px,4vw,44px); line-height: 1; letter-spacing: -1px; color: var(--accent); margin-bottom: 4px; }
+  .impact-lbl { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 1.4px; text-transform: uppercase; color: rgba(255,255,255,.65); font-weight: 700; }
+
+  /* GRID */
+  .grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 18px; }
+  @media (max-width: 980px) { .grid { grid-template-columns: 1fr; } }
+
+  /* CARDS */
+  .card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; }
+  .card-hed { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .card-hed h2 { font-size: 15px; font-weight: 600; margin: 0; letter-spacing: -.2px; }
+  .card-hed .link { font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--accent); text-decoration: none; cursor: pointer; background: none; border: none; font-family: var(--font-sans); }
+
+  /* LOG HOURS FORM */
+  .att-form { display: flex; flex-direction: column; gap: 12px; }
+  .att-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .att-input { padding: 11px 14px; border: 1px solid var(--line); background: var(--paper); border-radius: 10px; font: inherit; font-size: 13.5px; color: var(--ink); }
+  .att-input:focus { outline: 2px solid var(--accent); outline-offset: 2px; border-color: var(--accent); }
+  select.att-input { background-color: var(--paper); }
+  .att-submit { background: var(--accent); color: var(--paper); border: none; padding: 12px; border-radius: 10px; font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 1.3px; text-transform: uppercase; cursor: pointer; transition: background .15s; }
+  .att-submit:hover { background: var(--accent-2); }
+  .att-submit:disabled { opacity: .5; cursor: default; }
+
+  /* RESOURCES */
+  .res-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); cursor: pointer; }
+  .res-row:last-child { border-bottom: none; }
+  .res-row:hover .res-name { color: var(--accent); }
+  .res-icon { width: 32px; height: 32px; background: var(--paper-2); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .res-name { font-size: 13.5px; font-weight: 500; }
+  .res-meta { font-family: var(--font-mono); font-size: 10px; color: var(--ink-3); }
+
+  /* EVENTS */
+  .events-grid { display: flex; flex-direction: column; gap: 14px; max-width: 720px; }
+  .event-card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px; display: grid; grid-template-columns: 72px 1fr auto; gap: 18px; align-items: center; transition: border-color .15s; }
+  .event-card:hover { border-color: var(--accent); }
+  @media (max-width: 620px) { .event-card { grid-template-columns: 60px 1fr; } .event-card-action { grid-column: 1/-1; } }
+  .event-date-block { display: flex; flex-direction: column; align-items: center; background: var(--accent); color: var(--paper); border-radius: 12px; padding: 10px 6px; text-align: center; }
+  .event-day { font-size: 24px; font-weight: 700; line-height: 1; }
+  .event-month { font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: 1.3px; text-transform: uppercase; margin-top: 2px; }
+  .event-info h3 { font-size: 15px; font-weight: 600; margin: 0 0 4px; }
+  .event-info p { font-size: 13px; color: var(--ink-3); margin: 0 0 6px; line-height: 1.4; }
+  .event-meta-row { display: flex; flex-wrap: wrap; gap: 10px; }
+  .event-meta-chip { display: inline-flex; align-items: center; gap: 5px; font-family: var(--font-mono); font-size: 9.5px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: var(--ink-3); }
+  .event-join-btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; background: var(--accent); color: var(--paper); border: none; border-radius: 999px; font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: background .15s; white-space: nowrap; }
+  .event-join-btn:hover { background: var(--accent-2); }
+  .event-join-btn.is-joined { background: var(--green); cursor: default; }
+  .event-join-btn:disabled { opacity: .6; cursor: default; }
+  .events-empty { font-family: var(--font-serif); font-style: italic; font-size: 16px; color: var(--ink-3); padding: 40px 0; text-align: center; }
+
+  /* PHOTO UPLOAD */
+  .photo-section { max-width: 640px; }
+  .photo-upload-area { border: 2px dashed var(--line); border-radius: var(--radius); padding: 32px; text-align: center; cursor: pointer; transition: border-color .15s, background .15s; margin: 12px 0; }
+  .photo-upload-area:hover, .photo-upload-area.is-hover { border-color: var(--accent); background: rgba(30,58,111,.03); }
+  .photo-upload-area.has-file { border-color: var(--accent); border-style: solid; background: rgba(30,58,111,.04); }
+  .photo-upload-icon { font-size: 28px; margin-bottom: 8px; }
+  .photo-upload-label { font-size: 14px; font-weight: 500; color: var(--ink-3); }
+  .photo-upload-label strong { color: var(--accent); }
+  .photo-preview { max-width: 100%; max-height: 220px; border-radius: 10px; margin-top: 12px; object-fit: cover; display: none; }
+  .my-photos-list { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+  .my-photo-row { display: grid; grid-template-columns: 72px 1fr auto; gap: 12px; align-items: center; padding: 10px 14px; background: var(--paper-2); border-radius: 10px; }
+  .my-photo-thumb { width: 64px; height: 48px; object-fit: cover; border-radius: 8px; background: var(--line); }
+  .my-photo-info { font-size: 13px; }
+  .my-photo-program { font-family: var(--font-mono); font-size: 9.5px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: var(--accent); margin-bottom: 3px; }
+  .my-photo-caption { color: var(--ink); line-height: 1.3; }
+  .status-pill { display: inline-block; padding: 3px 10px; font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; border-radius: 999px; }
+  .status-pill.pending { background: rgba(197,150,26,.14); color: var(--gold); }
+  .status-pill.approved { background: rgba(46,139,87,.14); color: var(--green); }
+  .status-pill.rejected { background: rgba(196,40,40,.10); color: #C42828; }
+
+  /* TOAST */
+  .btc-toast-stack { position: fixed; bottom: 24px; right: 24px; z-index: 999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+  .btc-toast { display: flex; align-items: center; gap: 10px; background: var(--ink); color: var(--paper); padding: 12px 16px; border-radius: 12px; font-size: 13px; pointer-events: all; animation: toastIn .25s ease; max-width: 340px; }
+  .btc-toast-close { background: none; border: none; color: rgba(255,255,255,.5); cursor: pointer; font-size: 18px; line-height: 1; padding: 0; margin-left: 4px; }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(8px); } }
+  .btc-toast.is-leaving { opacity: 0; transform: translateY(4px); transition: .25s; }
+
+  /* UPLOAD PROGRESS */
+  .upload-progress { height: 4px; background: var(--paper-2); border-radius: 999px; overflow: hidden; display: none; margin-top: 8px; }
+  .upload-progress-fill { height: 100%; background: var(--accent); border-radius: 999px; transition: width .3s; width: 0%; }
+
+  .session-hint { display: inline-block; background: rgba(30,58,111,.08); border: 1px solid rgba(30,58,111,.15); border-radius: 10px; padding: 10px 14px; font-size: 13px; color: var(--ink-3); font-family: var(--font-serif); font-style: italic; margin-top: 8px; }
+
+  /* PROGRAMS */
+  .programs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; max-width: 900px; }
+  .prog-interest-card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; gap: 12px; transition: border-color .15s; }
+  .prog-interest-card:hover { border-color: var(--accent); }
+  .prog-interest-card.is-interested { border-color: var(--green); background: rgba(46,139,87,.03); }
+  .prog-card-icon { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .prog-card-name { font-size: 15px; font-weight: 600; margin: 0; }
+  .prog-card-tagline { font-size: 13px; color: var(--ink-3); margin: 0; line-height: 1.4; }
+  .prog-interest-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--accent); color: var(--paper); border: none; border-radius: 999px; font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: background .15s; align-self: flex-start; margin-top: auto; }
+  .prog-interest-btn:hover { background: var(--accent-2); }
+  .prog-interest-btn.is-sent { background: var(--green); cursor: default; }
+  .prog-interest-btn:disabled { opacity: .6; cursor: default; }
+  .prog-website-btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: var(--paper-2); color: var(--ink); border: 1px solid var(--line); border-radius: 999px; font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; text-decoration: none; transition: border-color .15s; }
+  .prog-website-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* MY EVENTS DASH */
+  .my-ev-row { display: grid; grid-template-columns: 48px 1fr; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .my-ev-row:last-child { border-bottom: none; }
+  .my-ev-date { display: flex; flex-direction: column; align-items: center; background: var(--accent); color: var(--paper); border-radius: 8px; padding: 5px 4px; text-align: center; }
+  .my-ev-day { font-size: 17px; font-weight: 700; line-height: 1; }
+  .my-ev-month { font-family: var(--font-mono); font-size: 8px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-top: 1px; }
+  .my-ev-title { font-size: 13.5px; font-weight: 600; margin: 0 0 2px; }
+  .my-ev-meta { font-size: 12px; color: var(--ink-3); margin: 0; }
+
+  /* MOBILE BOTTOM NAV */
+  .vol-bnav { display: none; }
+  @media (max-width: 880px) {
+    .vol-bnav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 200; background: var(--ink); border-top: 1px solid rgba(255,255,255,.08); padding-bottom: env(safe-area-inset-bottom, 0); }
+    .vol-bnav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 9px 2px 7px; min-height: 44px; color: rgba(255,255,255,.45); cursor: pointer; background: none; border: none; font-family: var(--font-sans); transition: color .15s; -webkit-tap-highlight-color: transparent; }
+    .vol-bnav-item:hover, .vol-bnav-item.is-active { color: var(--paper); }
+    .vol-bnav-item.is-active svg { color: var(--accent); }
+    .vol-bnav-item svg { width: 20px; height: 20px; }
+    .vol-bnav-label { font-family: var(--font-mono); font-size: 8.5px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; }
+  }
+</style>
+</head>
+<body>
+
+<div id="auth-guard"><div class="spinner"></div></div>
+<div id="btc-toast-stack" class="btc-toast-stack"></div>
+
+<!-- First-time volunteer registration -->
+<div class="reg-overlay is-hidden" id="vol-reg-overlay">
+  <div class="reg-sheet">
+    <h2>Complete your profile</h2>
+    <p>Fill in your details once — helps us match you with the right programs.</p>
+    <div class="reg-field">
+      <label class="reg-label" for="vreg-name">Full Name *</label>
+      <input class="reg-input" id="vreg-name" type="text" placeholder="Your full name" autocomplete="name" />
+    </div>
+    <div class="reg-field">
+      <label class="reg-label" for="vreg-mobile">Mobile Number *</label>
+      <input class="reg-input" id="vreg-mobile" type="tel" placeholder="10-digit number" maxlength="10" />
+    </div>
+    <div class="reg-field">
+      <label class="reg-label" for="vreg-occ">You are currently *</label>
+      <select class="reg-input" id="vreg-occ">
+        <option value="">Select one</option>
+        <option value="employed">Employed (Job)</option>
+        <option value="student">Student</option>
+        <option value="business">Business / Self-employed</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div class="reg-field">
+      <label class="reg-label" for="vreg-edu">Education Background *</label>
+      <input class="reg-input" id="vreg-edu" type="text" placeholder="e.g. B.Tech CSE, MBA, Class 12" />
+    </div>
+    <div class="reg-field">
+      <label class="reg-label" for="vreg-contrib">What can you contribute? *</label>
+      <input class="reg-input" id="vreg-contrib" type="text" placeholder="e.g. Teaching, Photography, Social media" />
+    </div>
+    <div class="reg-field">
+      <label class="reg-label" for="vreg-project">Which program interests you most? *</label>
+      <select class="reg-input" id="vreg-project">
+        <option value="">Select a program</option>
+        <option>Coding on Wheels</option>
+        <option>Cross Connect</option>
+        <option>Dream Catchers</option>
+        <option>Eko Warriors</option>
+        <option>GHR (Good Health Run)</option>
+        <option>Pawtection</option>
+        <option>We — Women Empowerment</option>
+        <option>ChangeMaker Awards</option>
+        <option>Any / All programs</option>
+      </select>
+    </div>
+    <button class="reg-submit" id="vol-reg-submit" onclick="_submitVolReg()">Save &amp; Continue</button>
+    <span class="reg-skip" onclick="_skipVolReg()">Skip for now</span>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <button class="sb-back" onclick="history.length>1?history.back():window.location.href='../login.html'" aria-label="Go back">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+      </button>
+      <img src="../assets/bthechange-logo.png" alt="B The Change" class="sb-brand-logo" />
+      <div class="sb-brand-name">B The Change<small>VOLUNTEER</small></div>
+    </div>
+    <nav class="sb-nav">
+      <button class="sb-link is-active" data-section="dashboard">
+        <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </button>
+      <button class="sb-link" data-section="events">
+        <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Events
+      </button>
+      <button class="sb-link" data-section="photos">
+        <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        Program Photos
+      </button>
+      <button class="sb-link" data-section="log">
+        <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        Log Hours
+      </button>
+      <button class="sb-link" data-section="schools">
+        <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        My Schools
+      </button>
+      <button class="sb-link" data-section="programs">
+        <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        Programs
+      </button>
+      <button class="sb-link" data-section="resources">
+        <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        Resources
+      </button>
+      <div class="sb-divider"></div>
+      <button class="sb-link" onclick="window.location.href='../index.html'">
+        <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        Main website
+      </button>
+      <button class="sb-link" onclick="window.location.href='../submit.html'">
+        <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        Share a story
+      </button>
+    </nav>
+    <div class="sb-foot">
+      <div class="sb-user">
+        <div class="sb-avatar" id="sb-avatar">V</div>
+        <div>
+          <div class="sb-user-name" id="sb-user-name">Volunteer</div>
+          <div class="sb-user-meta">VOLUNTEER</div>
+        </div>
+      </div>
+      <button class="sb-signout" id="signout-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
+        Sign out
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- ===== DASHBOARD ===== -->
+    <section class="vol-section is-active" id="vs-dashboard">
+      <div class="page-head">
+        <div>
+          <div class="page-eyebrow">VOLUNTEER · B THE CHANGE</div>
+          <h1 class="page-title">Welcome back, <em id="welcome-name">there.</em></h1>
+        </div>
+        <button class="quick-act" onclick="showSection('log')">+ Log a session</button>
+      </div>
+
+      <div class="impact-bar">
+        <div class="impact-cell"><div class="impact-num" id="stat-sessions">—</div><div class="impact-lbl">Sessions taught</div></div>
+        <div class="impact-cell"><div class="impact-num" id="stat-children">—</div><div class="impact-lbl">Children mentored</div></div>
+        <div class="impact-cell"><div class="impact-num" id="stat-hours">—</div><div class="impact-lbl">Hours given</div></div>
+        <div class="impact-cell"><div class="impact-num" id="stat-schools">—</div><div class="impact-lbl">Schools served</div></div>
+      </div>
+
+      <div class="grid">
+        <div>
+          <div class="card">
+            <div class="card-hed">
+              <h2>Upcoming Sessions</h2>
+            </div>
+            <div style="display:grid;grid-template-columns:64px 1fr auto;gap:14px;padding:14px;border:1px solid var(--line);border-radius:12px;align-items:center;">
+              <div style="display:flex;flex-direction:column;align-items:center;padding:8px 0;background:var(--accent);color:var(--paper);border-radius:10px;">
+                <div style="font-size:22px;font-weight:700;line-height:1;">—</div>
+                <div style="font-family:var(--font-mono);font-size:9.5px;font-weight:700;letter-spacing:1.3px;margin-top:2px;text-transform:uppercase;">TBD</div>
+              </div>
+              <div>
+                <h3 style="font-size:14.5px;margin:0 0 4px;font-weight:600;">Your next session</h3>
+                <p style="font-size:12.5px;margin:0;color:var(--ink-3);">Check with your program coordinator for schedule</p>
+              </div>
+              <a href="https://wa.me/919000935898" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:var(--paper-2);border:1px solid var(--line);border-radius:999px;font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink);text-decoration:none;">Contact</a>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:16px;" id="my-events-dash-card">
+            <div class="card-hed">
+              <h2>My Registered Events</h2>
+              <button class="link" onclick="showSection('events')" style="background:none;border:none;cursor:pointer;font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent);">All events →</button>
+            </div>
+            <div id="my-events-dash-list">
+              <div style="font-family:var(--font-serif);font-style:italic;font-size:14px;color:var(--mute);">Loading your events...</div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:16px;">
+            <div class="card-hed"><h2>Quick Actions</h2></div>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;">
+              <button class="quick-act" onclick="showSection('programs')" style="background:var(--paper-2);color:var(--ink);font-size:13px;padding:9px 16px;">View programs →</button>
+              <button class="quick-act" onclick="showSection('photos')" style="background:var(--paper-2);color:var(--ink);font-size:13px;padding:9px 16px;">Upload a photo →</button>
+              <button class="quick-act" onclick="showSection('log')" style="background:var(--paper-2);color:var(--ink);font-size:13px;padding:9px 16px;">Log hours →</button>
+            </div>
+            <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line);">
+              <a href="https://bthechange.in" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--accent);font-weight:500;text-decoration:none;">Visit bthechange.in ↗</a>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card">
+            <div class="card-hed"><h2>My Schools</h2></div>
+            <div style="font-family:var(--font-serif);font-style:italic;font-size:14px;color:var(--ink-3);line-height:1.5;padding:8px 0;">
+              Your school assignments will appear here once a coordinator connects you to a program.
+            </div>
+            <a href="https://wa.me/919000935898?text=Hi%2C%20I%20am%20a%20volunteer%20and%20would%20like%20to%20be%20assigned%20to%20a%20school." target="_blank" rel="noopener" style="display:inline-block;margin-top:12px;padding:9px 14px;background:var(--paper-2);border-radius:999px;font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink);text-decoration:none;">Request assignment →</a>
+          </div>
+
+          <div class="card" style="margin-top:16px;">
+            <div class="card-hed"><h2>Reimbursement</h2></div>
+            <div style="font-family:var(--font-serif);font-style:italic;font-size:14.5px;color:var(--ink-3);line-height:1.5;">
+              Travel reimbursements are processed every Friday. Submit your claim via WhatsApp with bills attached.
+            </div>
+            <a href="https://wa.me/919000935898?text=Hi%2C%20I%20want%20to%20submit%20a%20travel%20reimbursement%20claim." target="_blank" rel="noopener" style="display:inline-block;margin-top:12px;padding:9px 14px;background:var(--paper-2);border-radius:999px;font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink);text-decoration:none;">Submit a claim →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== EVENTS ===== -->
+    <section class="vol-section" id="vs-events">
+      <div class="page-head">
+        <div>
+          <div class="page-eyebrow">EVENTS · B THE CHANGE</div>
+          <h1 class="page-title">Join an <em>event.</em></h1>
+        </div>
+      </div>
+      <div id="events-list" class="events-grid">
+        <div class="events-empty">Loading events...</div>
+      </div>
+    </section>
+
+    <!-- ===== PROGRAM PHOTOS ===== -->
+    <section class="vol-section" id="vs-photos">
+      <div class="page-head">
+        <div>
+          <div class="page-eyebrow">PROGRAM PHOTOS</div>
+          <h1 class="page-title">Share a <em>photo.</em></h1>
+        </div>
+      </div>
+      <div class="photo-section">
+        <div class="card">
+          <p style="color:var(--ink-3);font-size:14px;margin:0 0 16px;">Select the program you volunteered for, upload a photo from your latest session, and add a short caption. Admin will review it — once approved it appears on the program page on the website.</p>
+          <form id="photo-form" class="att-form">
+            <select class="att-input" id="photo-program" required>
+              <option value="">Select program...</option>
+              <option value="coding-on-wheels">Coding on Wheels</option>
+              <option value="lawgic">L.A.W.G.I.C.</option>
+              <option value="eko-warriors">EKO Warriors</option>
+              <option value="we-women-empowerment">WE: Women Empowerment</option>
+              <option value="changemakers">Changemakers</option>
+              <option value="dreamcatchers">Dreamcatchers</option>
+              <option value="other">Other</option>
+            </select>
+
+            <div id="photo-drop" class="photo-upload-area" role="button" tabindex="0" aria-label="Upload photo">
+              <div class="photo-upload-icon">📷</div>
+              <div class="photo-upload-label"><strong>Tap to choose a photo</strong> or drag and drop</div>
+              <div style="font-family:var(--font-mono);font-size:9.5px;color:var(--mute);margin-top:6px;letter-spacing:.6px;">JPG · PNG · WEBP · MAX 5 MB</div>
+              <input type="file" id="photo-file" accept="image/jpeg,image/png,image/webp" style="display:none;" />
+              <img id="photo-preview" class="photo-preview" alt="Preview" />
+            </div>
+            <div class="upload-progress" id="upload-progress"><div class="upload-progress-fill" id="upload-progress-fill"></div></div>
+
+            <textarea class="att-input" id="photo-caption" rows="2" placeholder="Short caption — what's happening in this photo? (optional)"></textarea>
+            <button type="submit" class="att-submit" id="photo-submit-btn">Submit for review</button>
+            <div id="photo-result" style="display:none;font-size:13px;color:var(--green);font-weight:600;margin-top:4px;"></div>
+          </form>
+        </div>
+
+        <div class="card" style="margin-top:18px;" id="my-photos-card">
+          <div class="card-hed">
+            <h2>My submitted photos</h2>
+            <span style="font-family:var(--font-mono);font-size:9.5px;color:var(--ink-3);letter-spacing:.8px;text-transform:uppercase;" id="my-photos-count"></span>
+          </div>
+          <div id="my-photos-list" class="my-photos-list">
+            <div style="font-family:var(--font-serif);font-style:italic;font-size:14px;color:var(--mute);">No photos submitted yet.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== LOG HOURS ===== -->
+    <section class="vol-section" id="vs-log">
+      <div class="page-head">
+        <div>
+          <div class="page-eyebrow">ATTENDANCE · B THE CHANGE</div>
+          <h1 class="page-title">Log your <em>hours.</em></h1>
+        </div>
+      </div>
+      <div style="max-width: 560px;">
+        <div class="card" id="log-hours-card">
+          <div class="card-hed">
+            <h2>Log a Session</h2>
+          </div>
+          <form class="att-form" id="log-hours-form">
+            <div class="att-row">
+              <select class="att-input" id="log-program">
+                <option value="coding-on-wheels">Coding on Wheels</option>
+                <option value="lawgic">L.A.W.G.I.C.</option>
+                <option value="eko-warriors">EKO Warriors</option>
+                <option value="we-women-empowerment">WE: Women Empowerment</option>
+                <option value="changemakers">Changemakers</option>
+                <option value="other">Other</option>
+              </select>
+              <input type="date" class="att-input" id="log-date" />
+            </div>
+            <div class="att-row">
+              <input type="number" class="att-input" id="log-hours" placeholder="Hours" min="0.5" step="0.5" />
+              <input type="number" class="att-input" id="log-children" placeholder="Children reached" min="0" />
+            </div>
+            <textarea class="att-input" id="log-notes" rows="2" placeholder="What did you cover today? (optional)"></textarea>
+            <button type="submit" class="att-submit" id="log-submit-btn">Submit hours</button>
+            <div id="log-result" style="display:none;font-size:13px;color:var(--green);font-weight:600;margin-top:4px;"></div>
+          </form>
+        </div>
+        <div class="card" style="margin-top:16px;" id="log-history-card">
+          <div class="card-hed"><h2>Recent logs</h2></div>
+          <div id="log-history-list" style="font-family:var(--font-serif);font-style:italic;font-size:14px;color:var(--mute);">Your past submissions will appear here.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SCHOOLS ===== -->
+    <section class="vol-section" id="vs-schools">
+      <div class="page-head">
+        <div>
+          <div class="page-eyebrow">MY SCHOOLS · B THE CHANGE</div>
+          <h1 class="page-title">Your <em>assignments.</em></h1>
+        </div>
+      </div>
+      <div style="max-width:560px;" class="card">
+        <div style="font-family:var(--font-serif);font-style:italic;font-size:14px;color:var(--ink-3);line-height:1.5;padding:8px 0;">
+          Your school assignments will appear here once a coordinator connects you to a program.
+        </div>
+        <a href="https://wa.me/919000935898?text=Hi%2C%20I%20am%20a%20volunteer%20and%20would%20like%20to%20be%20assigned%20to%20a%20school." target="_blank" rel="noopener" style="display:inline-block;margin-top:12px;padding:9px 14px;background:var(--paper-2);border-radius:999px;font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink);text-decoration:none;">Request assignment →</a>
+      </div>
+    </section>
+
+    <!-- ===== PROGRAMS ===== -->
+    <section class="vol-section" id="vs-programs">
+      <div class="page-head">
+        <div>
+          <div class="page-eyebrow">PROGRAMS · B THE CHANGE</div>
+          <h1 class="page-title">Express your <em>interest.</em></h1>
+        </div>
+        <a href="https://bthechange.in/#programs" target="_blank" rel="noopener" class="quick-act" style="font-size:13px;padding:10px 16px;text-decoration:none;">Visit bthechange.in ↗</a>
+      </div>
+      <p style="color:var(--ink-3);font-size:14px;max-width:560px;margin:0 0 24px;line-height:1.6;">Click "I'm Interested" on any program below to let the admin team know you'd like to volunteer for it. They'll follow up to get you assigned.</p>
+      <div class="programs-grid" id="programs-grid">
+        <div style="font-family:var(--font-serif);font-style:italic;font-size:14px;color:var(--mute);">Loading programs...</div>
+      </div>
+      <div id="my-interests-card" style="margin-top:28px;max-width:560px;display:none;">
+        <div class="card">
+          <div class="card-hed"><h2>My Submitted Interests</h2></div>
+          <div id="my-interests-list" style="font-family:var(--font-serif);font-style:italic;font-size:14px;color:var(--mute);">None yet.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== RESOURCES ===== -->
+    <section class="vol-section" id="vs-resources">
+      <div class="page-head">
+        <div>
+          <div class="page-eyebrow">RESOURCES · B THE CHANGE</div>
+          <h1 class="page-title">Volunteer <em>toolkit.</em></h1>
+        </div>
+      </div>
+      <div style="max-width:560px;" class="card">
+        <div class="res-row" onclick="window.open('../assets/reports/btc-annual-report-2024.pdf')">
+          <div class="res-icon">📘</div>
+          <div style="flex:1;"><div class="res-name">Annual Report 2024</div><div class="res-meta">PDF · B THE CHANGE</div></div>
+        </div>
+        <div class="res-row" onclick="window.open('../programs/coding-on-wheels.html')">
+          <div class="res-icon">🚌</div>
+          <div style="flex:1;"><div class="res-name">Coding on Wheels program guide</div><div class="res-meta">PROGRAM OVERVIEW</div></div>
+        </div>
+        <div class="res-row" onclick="window.open('https://wa.me/919000935898?text=Hi%2C%20I%20need%20the%20volunteer%20resource%20pack.')">
+          <div class="res-icon">📦</div>
+          <div style="flex:1;"><div class="res-name">Volunteer resource pack</div><div class="res-meta">REQUEST VIA WHATSAPP</div></div>
+        </div>
+        <div class="res-row" onclick="window.open('../programs/lawgic.html')">
+          <div class="res-icon">⚖️</div>
+          <div style="flex:1;"><div class="res-name">L.A.W.G.I.C. legal aid guide</div><div class="res-meta">PROGRAM OVERVIEW</div></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+/* ── TOAST ── */
+function showToast(msg) {
+  var stack = document.getElementById('btc-toast-stack');
+  var el = document.createElement('div');
+  el.className = 'btc-toast';
+  var span = document.createElement('span');
+  span.style.flex = '1';
+  span.textContent = String(msg || '');
+  var btn = document.createElement('button');
+  btn.className = 'btc-toast-close';
+  btn.setAttribute('aria-label', 'Close');
+  btn.textContent = '×';
+  el.appendChild(span);
+  el.appendChild(btn);
+  stack.appendChild(el);
+  var dismiss = function() { el.classList.add('is-leaving'); setTimeout(function(){ el.remove(); }, 260); };
+  btn.addEventListener('click', dismiss);
+  setTimeout(dismiss, 5000);
+}
+
+/* ── SECTION SWITCHING ── */
+function showSection(id) {
+  document.querySelectorAll('.vol-section').forEach(function(s) { s.classList.remove('is-active'); });
+  var sec = document.getElementById('vs-' + id);
+  if (sec) sec.classList.add('is-active');
+  document.querySelectorAll('.sb-link[data-section]').forEach(function(b) {
+    b.classList.toggle('is-active', b.dataset.section === id);
+  });
+  window.scrollTo(0, 0);
+  if (id === 'events') loadEventsSection();
+  if (id === 'photos') loadMyPhotos();
+  if (id === 'log') loadLogHistory();
+  if (id === 'programs') loadProgramsSection();
+}
+
+document.querySelectorAll('.sb-link[data-section]').forEach(function(b) {
+  b.addEventListener('click', function() { showSection(b.dataset.section); });
+});
+
+/* ── DATE FORMAT ── */
+function fmtDate(d) {
+  var dt = new Date(d + 'T00:00:00');
+  return { day: dt.getDate(), month: dt.toLocaleString('en-IN', { month: 'short' }).toUpperCase() };
+}
+function fmtDateLong(d) {
+  return new Date(d + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+/* ── BTC PROGRAMS DATA ── */
+var BTC_PROGRAMS = [
+  { slug: 'coding-on-wheels',      name: 'Coding on Wheels',        tagline: 'Mobile coding classrooms for government school students',      icon: '🚌', url: '../programs/coding-on-wheels.html' },
+  { slug: 'lawgic',                name: 'L.A.W.G.I.C.',            tagline: 'Legal awareness and rights education for communities',          icon: '⚖️', url: '../programs/lawgic.html' },
+  { slug: 'eko-warriors',          name: 'EKO Warriors',            tagline: 'Environmental education and grassroots action',                  icon: '🌿', url: '../programs/eko-warriors.html' },
+  { slug: 'we-women-empowerment',  name: 'WE: Women Empowerment',   tagline: 'Skill building and safety awareness for women and girls',       icon: '👩', url: '../programs/we-women-empowerment.html' },
+  { slug: 'changemakers',          name: 'Changemakers',            tagline: 'Youth leadership and civic responsibility program',             icon: '🌟', url: '../programs/changemakers.html' },
+  { slug: 'dreamcatchers',         name: 'Dreamcatchers',           tagline: 'Arts, creativity and expression for underprivileged children',  icon: '🎨', url: '../programs/dreamcatchers.html' },
+  { slug: 'cross-connect-legal-aid', name: 'Cross Connect',         tagline: 'Free legal aid and paralegal support for the community',       icon: '🤝', url: '../programs/cross-connect-legal-aid.html' },
+  { slug: 'launchpad',             name: 'Launchpad',               tagline: 'Entrepreneurship and self-reliance for youth',                  icon: '🚀', url: '../programs/launchpad.html' },
+];
+
+/* ── DEMO EVENTS DATA ── */
+var DEMO_EVENTS = [
+  {
+    id: 'demo-1',
+    title: 'Volunteer Training Day',
+    program_slug: 'coding-on-wheels',
+    event_date: '2026-06-25',
+    event_time: '10:00 AM',
+    location: 'BTC Office, Hyderabad',
+    description: 'Quarterly training for all Coding on Wheels volunteers. Topics: new curriculum, session planning, impact reporting.',
+    confirmed_count: 7
+  },
+  {
+    id: 'demo-2',
+    title: 'Community Cleanup Drive',
+    program_slug: 'eko-warriors',
+    event_date: '2026-06-28',
+    event_time: '8:00 AM',
+    location: 'Almasguda Park, Hyderabad',
+    description: 'Join us for a community cleanup with EKO Warriors students. Bring gloves and enthusiasm!',
+    confirmed_count: 14
+  },
+  {
+    id: 'demo-3',
+    title: 'Legal Awareness Camp',
+    program_slug: 'lawgic',
+    event_date: '2026-07-05',
+    event_time: '11:00 AM',
+    location: 'Visaka Nagar Community Hall',
+    description: 'Hands-on awareness session with LAWGIC students and community members on basic legal rights.',
+    confirmed_count: 5
+  }
+];
+
+var _SB = null;
+var _uid = null;
+var _volName = '';
+var _isDemo = false;
+var _joinedEventIds = new Set();
+
+/* ── EVENTS SECTION ── */
+function loadEventsSection() {
+  var listEl = document.getElementById('events-list');
+  if (_isDemo) {
+    renderEvents(listEl, DEMO_EVENTS, new Set());
+    return;
+  }
+  if (!_SB) return;
+  listEl.innerHTML = '<div class="events-empty">Loading events...</div>';
+
+  Promise.all([
+    _SB.from('events')
+      .select('*')
+      .eq('status', 'published')
+      .gte('event_date', new Date().toISOString().slice(0,10))
+      .order('event_date', { ascending: true }),
+    _SB.from('event_attendees')
+      .select('event_id')
+      .eq('user_id', _uid)
+  ]).then(function(results) {
+    var evRes = results[0], atRes = results[1];
+    if (evRes.error) { listEl.innerHTML = '<div class="events-empty">Could not load events.</div>'; return; }
+    var events = evRes.data || [];
+    var joined = new Set((atRes.data || []).map(function(a){ return a.event_id; }));
+    _joinedEventIds = joined;
+    renderEvents(listEl, events, joined);
+  });
+}
+
+function renderEvents(listEl, events, joined) {
+  if (!events.length) {
+    listEl.innerHTML = '<div class="events-empty">No upcoming events right now. Check back soon.</div>';
+    return;
+  }
+  listEl.innerHTML = events.map(function(ev) {
+    var d = fmtDate(ev.event_date);
+    var isJoined = joined.has(ev.id);
+    var count = ev.confirmed_count !== undefined ? ev.confirmed_count : '—';
+    return '<div class="event-card" data-event-id="' + ev.id + '">' +
+      '<div class="event-date-block"><div class="event-day">' + d.day + '</div><div class="event-month">' + d.month + '</div></div>' +
+      '<div class="event-info">' +
+        '<h3>' + esc(ev.title) + '</h3>' +
+        '<p>' + esc(ev.description || '') + '</p>' +
+        '<div class="event-meta-row">' +
+          (ev.location ? '<span class="event-meta-chip">📍 ' + esc(ev.location) + '</span>' : '') +
+          (ev.event_time ? '<span class="event-meta-chip">🕐 ' + esc(ev.event_time) + '</span>' : '') +
+          '<span class="event-meta-chip">👥 ' + count + ' registered</span>' +
+          (ev.program_slug ? '<span class="event-meta-chip" style="color:var(--accent);">' + esc(ev.program_slug.toUpperCase().replace(/-/g,' ')) + '</span>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="event-card-action">' +
+        '<button class="event-join-btn' + (isJoined ? ' is-joined' : '') + '" data-event-id="' + ev.id + '" data-event-date="' + ev.event_date + '" data-event-title="' + esc(ev.title) + '" data-event-location="' + esc(ev.location || '') + '"' + (isJoined ? ' disabled' : '') + '>' +
+        (isJoined ? '✓ Registered' : 'Join Event →') +
+        '</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  listEl.querySelectorAll('.event-join-btn:not(.is-joined)').forEach(function(btn) {
+    btn.addEventListener('click', function() { handleJoinEvent(btn); });
+  });
+}
+
+function handleJoinEvent(btn) {
+  var eventId = btn.dataset.eventId;
+  var eventTitle = btn.dataset.eventTitle;
+  var eventDate = btn.dataset.eventDate;
+  var eventLocation = btn.dataset.eventLocation;
+
+  btn.disabled = true;
+  btn.textContent = 'Joining...';
+
+  if (_isDemo) {
+    setTimeout(function() {
+      btn.classList.add('is-joined');
+      btn.textContent = '✓ Registered';
+      showToast('You\'re registered for ' + eventTitle + '! We\'ll see you on ' + fmtDateLong(eventDate) + '.');
+    }, 500);
+    return;
+  }
+
+  if (!_SB || !_uid) { btn.disabled = false; btn.textContent = 'Join Event →'; return; }
+
+  _SB.from('event_attendees').insert({
+    event_id: eventId,
+    user_id: _uid,
+    display_name: _volName,
+    status: 'confirmed'
+  }).then(function(res) {
+    if (res.error && res.error.code !== '23505') {
+      btn.disabled = false;
+      btn.textContent = 'Join Event →';
+      showToast('Could not join: ' + (res.error.message || 'error'));
+      return;
+    }
+    btn.classList.add('is-joined');
+    btn.textContent = '✓ Registered';
+    _joinedEventIds.add(eventId);
+    var loc = eventLocation ? ' at ' + eventLocation : '';
+    showToast('You\'re registered for ' + eventTitle + '! We\'ll see you on ' + fmtDateLong(eventDate) + loc + '. See you there!');
+  });
+}
+
+/* ── PHOTO UPLOAD ── */
+var _selectedFile = null;
+
+(function initPhotoUpload() {
+  var dropEl = document.getElementById('photo-drop');
+  var fileInput = document.getElementById('photo-file');
+  var preview = document.getElementById('photo-preview');
+
+  function setFile(file) {
+    if (!file || !file.type.startsWith('image/')) return;
+    if (file.size > 5 * 1024 * 1024) { showToast('Image must be under 5 MB.'); return; }
+    _selectedFile = file;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      preview.src = e.target.result;
+      preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+    dropEl.classList.add('has-file');
+  }
+
+  dropEl.addEventListener('click', function() { fileInput.click(); });
+  dropEl.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') fileInput.click(); });
+  fileInput.addEventListener('change', function() { if (fileInput.files[0]) setFile(fileInput.files[0]); });
+
+  dropEl.addEventListener('dragover', function(e) { e.preventDefault(); dropEl.classList.add('is-hover'); });
+  dropEl.addEventListener('dragleave', function() { dropEl.classList.remove('is-hover'); });
+  dropEl.addEventListener('drop', function(e) {
+    e.preventDefault();
+    dropEl.classList.remove('is-hover');
+    if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
+  });
+})();
+
+document.getElementById('photo-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  var program = document.getElementById('photo-program').value;
+  var caption = document.getElementById('photo-caption').value.trim();
+  var btn = document.getElementById('photo-submit-btn');
+  var resultEl = document.getElementById('photo-result');
+
+  if (!program) { showToast('Please select a program.'); return; }
+  if (!_selectedFile && !_isDemo) { showToast('Please select a photo to upload.'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Uploading...';
+  resultEl.style.display = 'none';
+
+  if (_isDemo) {
+    setTimeout(function() {
+      btn.disabled = false;
+      btn.textContent = 'Submit for review';
+      resultEl.textContent = 'Photo submitted (demo mode). Admin will review and approve.';
+      resultEl.style.display = 'block';
+      showToast('Photo submitted for review!');
+    }, 800);
+    return;
+  }
+
+  if (!_SB || !_uid) { btn.disabled = false; btn.textContent = 'Submit for review'; return; }
+
+  try {
+    var progressBar = document.getElementById('upload-progress');
+    var progressFill = document.getElementById('upload-progress-fill');
+    progressBar.style.display = 'block';
+    progressFill.style.width = '30%';
+
+    var ext = _selectedFile.name.split('.').pop().toLowerCase() || 'jpg';
+    var path = 'program-photos/' + _uid + '/' + Date.now() + '.' + ext;
+
+    progressFill.style.width = '60%';
+    var upRes = await _SB.storage.from('submission-images').upload(path, _selectedFile, { upsert: false });
+    if (upRes.error) throw upRes.error;
+
+    progressFill.style.width = '85%';
+    var urlData = _SB.storage.from('submission-images').getPublicUrl(path);
+    var photoUrl = urlData.data.publicUrl;
+
+    var storyText = '[PROGRAM PHOTO] ' + (caption || 'Photo from ' + program + ' session.');
+    var ins = await _SB.from('submissions').insert({
+      submitter_name: _volName,
+      submitter_role: 'volunteer',
+      submitter_user_id: _uid,
+      program_slug: program,
+      story_text: storyText,
+      image_url: photoUrl,
+      status: 'pending',
+    });
+    if (ins.error) throw ins.error;
+
+    progressFill.style.width = '100%';
+    setTimeout(function() { progressBar.style.display = 'none'; progressFill.style.width = '0%'; }, 800);
+
+    _selectedFile = null;
+    document.getElementById('photo-file').value = '';
+    document.getElementById('photo-preview').style.display = 'none';
+    document.getElementById('photo-drop').classList.remove('has-file');
+    document.getElementById('photo-caption').value = '';
+    document.getElementById('photo-program').value = '';
+    resultEl.textContent = 'Photo submitted for review. Once approved by admin it will appear on the ' + program.replace(/-/g,' ') + ' page.';
+    resultEl.style.display = 'block';
+    showToast('Photo submitted! Admin will review and approve.');
+    loadMyPhotos();
+  } catch(err) {
+    showToast('Upload failed: ' + (err.message || 'error'));
+    progressBar.style.display = 'none';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Submit for review';
+  }
+});
+
+function loadMyPhotos() {
+  var listEl = document.getElementById('my-photos-list');
+  var countEl = document.getElementById('my-photos-count');
+  if (_isDemo) {
+    listEl.innerHTML = '<div style="font-family:var(--font-serif);font-style:italic;font-size:14px;color:var(--mute);">No photos submitted yet (demo mode).</div>';
+    return;
+  }
+  if (!_SB || !_uid) return;
+  listEl.innerHTML = '<div style="color:var(--mute);font-size:13px;">Loading...</div>';
+  _SB.from('submissions')
+    .select('id, program_slug, story_text, image_url, status, created_at')
+    .eq('submitter_user_id', _uid)
+    .like('story_text', '[PROGRAM PHOTO]%')
+    .order('created_at', { ascending: false })
+    .limit(10)
+    .then(function(res) {
+      if (!res.data || !res.data.length) {
+        listEl.innerHTML = '<div style="font-family:var(--font-serif);font-style:italic;font-size:14px;color:var(--mute);">No photos submitted yet.</div>';
+        return;
+      }
+      countEl.textContent = res.data.length + ' SUBMITTED';
+      var now = Date.now();
+      listEl.innerHTML = res.data.map(function(p) {
+        var cap = (p.story_text || '').replace('[PROGRAM PHOTO] ', '');
+        var statusLabel = (p.status || 'pending').toUpperCase();
+        var statusClass = p.status || 'pending';
+        if (p.status === 'pending') {
+          var daysOld = Math.floor((now - new Date(p.created_at).getTime()) / 86400000);
+          var daysLeft = 7 - daysOld;
+          statusLabel = daysLeft <= 0 ? 'GOING LIVE SOON' : 'PENDING · ' + daysLeft + 'd left';
+        }
+        return '<div class="my-photo-row">' +
+          (p.image_url ? '<img class="my-photo-thumb" src="' + esc(p.image_url) + '" alt="' + esc(cap) + '" loading="lazy" />' : '<div class="my-photo-thumb" style="display:flex;align-items:center;justify-content:center;font-size:18px;">📷</div>') +
+          '<div class="my-photo-info"><div class="my-photo-program">' + esc(p.program_slug || '') + '</div><div class="my-photo-caption">' + esc(cap) + '</div></div>' +
+          '<div><span class="status-pill ' + statusClass + '">' + statusLabel + '</span></div>' +
+        '</div>';
+      }).join('');
+    });
+}
+
+function loadLogHistory() {
+  var listEl = document.getElementById('log-history-list');
+  if (_isDemo || !_SB || !_uid) return;
+  _SB.from('submissions')
+    .select('program_slug, event_date, story_text, created_at')
+    .eq('submitter_user_id', _uid)
+    .not('story_text', 'like', '[PROGRAM PHOTO]%')
+    .order('created_at', { ascending: false })
+    .limit(8)
+    .then(function(res) {
+      if (!res.data || !res.data.length) return;
+      listEl.innerHTML = res.data.map(function(s) {
+        var d = s.event_date ? fmtDateLong(s.event_date) : new Date(s.created_at).toLocaleDateString('en-IN');
+        return '<div style="padding:10px 0;border-bottom:1px solid var(--line);">' +
+          '<div style="font-family:var(--font-mono);font-size:9.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--accent);">' + esc(s.program_slug || '') + ' · ' + d + '</div>' +
+          '<div style="font-size:13px;color:var(--ink-3);margin-top:3px;">' + esc((s.story_text || '').slice(0, 120)) + '</div>' +
+        '</div>';
+      }).join('');
+    });
+}
+
+function esc(s) { return String(s||'').replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]);}); }
+
+/* ── MY EVENTS (DASHBOARD CARD) ── */
+var _myEventIds = new Set();
+
+function loadMyEventsDash() {
+  var listEl = document.getElementById('my-events-dash-list');
+  if (_isDemo) {
+    listEl.innerHTML = '<div class="my-ev-row">' +
+      '<div class="my-ev-date"><div class="my-ev-day">25</div><div class="my-ev-month">JUN</div></div>' +
+      '<div><div class="my-ev-title">Volunteer Training Day</div><div class="my-ev-meta">BTC Office, Hyderabad · 10:00 AM</div></div>' +
+    '</div>' +
+    '<div style="margin-top:10px;"><button onclick="showSection(\'events\')" style="background:none;border:none;font-size:13px;color:var(--accent);font-weight:500;cursor:pointer;padding:0;">View all events →</button></div>';
+    return;
+  }
+  if (!_SB || !_uid) return;
+  _SB.from('event_attendees')
+    .select('event_id, events(id, title, event_date, event_time, location)')
+    .eq('user_id', _uid)
+    .eq('status', 'confirmed')
+    .order('joined_at', { ascending: false })
+    .limit(3)
+    .then(function(res) {
+      var rows = (res.data || []).filter(function(r){ return r.events; });
+      _myEventIds = new Set(rows.map(function(r){ return r.event_id; }));
+      if (!rows.length) {
+        listEl.innerHTML = '<div style="font-family:var(--font-serif);font-style:italic;font-size:14px;color:var(--mute);">No events registered yet. <button onclick="showSection(\'events\')" style="background:none;border:none;font-size:13px;color:var(--accent);font-weight:500;cursor:pointer;padding:0;">Browse events →</button></div>';
+        return;
+      }
+      listEl.innerHTML = rows.map(function(r) {
+        var ev = r.events;
+        var d = fmtDate(ev.event_date);
+        return '<div class="my-ev-row">' +
+          '<div class="my-ev-date"><div class="my-ev-day">' + d.day + '</div><div class="my-ev-month">' + d.month + '</div></div>' +
+          '<div><div class="my-ev-title">' + esc(ev.title) + '</div><div class="my-ev-meta">' + (ev.location ? esc(ev.location) : '') + (ev.event_time ? ' · ' + esc(ev.event_time) : '') + '</div></div>' +
+        '</div>';
+      }).join('') + '<div style="margin-top:10px;"><button onclick="showSection(\'events\')" style="background:none;border:none;font-size:13px;color:var(--accent);font-weight:500;cursor:pointer;padding:0;">View all events →</button></div>';
+    });
+}
+
+/* ── PROGRAMS + INTEREST ── */
+var _myInterestSlugs = new Set();
+
+function loadProgramsSection() {
+  var grid = document.getElementById('programs-grid');
+  grid.innerHTML = BTC_PROGRAMS.map(function(p) {
+    var isSent = _myInterestSlugs.has(p.slug);
+    return '<div class="prog-interest-card' + (isSent ? ' is-interested' : '') + '" id="pic-' + p.slug + '">' +
+      '<div class="prog-card-icon">' + p.icon + '</div>' +
+      '<h3 class="prog-card-name">' + esc(p.name) + '</h3>' +
+      '<p class="prog-card-tagline">' + esc(p.tagline) + '</p>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:auto;">' +
+        '<button class="prog-interest-btn' + (isSent ? ' is-sent' : '') + '" data-slug="' + p.slug + '" data-name="' + esc(p.name) + '"' + (isSent ? ' disabled' : '') + '>' +
+          (isSent ? '✓ Interest sent' : "I'm Interested →") +
+        '</button>' +
+        '<a class="prog-website-btn" href="' + esc(p.url) + '" target="_blank" rel="noopener">Learn more ↗</a>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  grid.querySelectorAll('.prog-interest-btn:not(.is-sent)').forEach(function(btn) {
+    btn.addEventListener('click', function() { expressInterest(btn); });
+  });
+
+  loadMyInterests();
+}
+
+function expressInterest(btn) {
+  var slug = btn.dataset.slug;
+  var name = btn.dataset.name;
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+
+  if (_isDemo) {
+    setTimeout(function() {
+      btn.classList.add('is-sent');
+      btn.textContent = '✓ Interest sent';
+      var card = document.getElementById('pic-' + slug);
+      if (card) card.classList.add('is-interested');
+      _myInterestSlugs.add(slug);
+      showToast('Interest in ' + name + ' sent to admin. They will follow up with you.');
+    }, 400);
+    return;
+  }
+
+  if (!_SB || !_uid) { btn.disabled = false; btn.textContent = "I'm Interested →"; return; }
+
+  var storyText = '[VOLUNTEER INTEREST] ' + _volName + ' would like to volunteer for the ' + name + ' program.';
+  _SB.from('submissions').insert({
+    submitter_name: _volName,
+    submitter_role: 'volunteer',
+    submitter_user_id: _uid,
+    program_slug: slug,
+    story_text: storyText,
+    status: 'pending',
+  }).then(function(res) {
+    if (res.error && res.error.code !== '23505') {
+      btn.disabled = false;
+      btn.textContent = "I'm Interested →";
+      showToast('Could not send. Please try again.');
+      return;
+    }
+    btn.classList.add('is-sent');
+    btn.textContent = '✓ Interest sent';
+    var card = document.getElementById('pic-' + slug);
+    if (card) card.classList.add('is-interested');
+    _myInterestSlugs.add(slug);
+    showToast('Interest in ' + name + ' sent! Admin will follow up to get you assigned.');
+    loadMyInterests();
+  });
+}
+
+function loadMyInterests() {
+  var card = document.getElementById('my-interests-card');
+  var listEl = document.getElementById('my-interests-list');
+  if (_isDemo) return;
+  if (!_SB || !_uid) return;
+  _SB.from('submissions')
+    .select('program_slug, created_at, status')
+    .eq('submitter_user_id', _uid)
+    .like('story_text', '[VOLUNTEER INTEREST]%')
+    .order('created_at', { ascending: false })
+    .then(function(res) {
+      if (!res.data || !res.data.length) return;
+      res.data.forEach(function(r) { _myInterestSlugs.add(r.program_slug); });
+      card.style.display = '';
+      listEl.innerHTML = res.data.map(function(r) {
+        var prog = BTC_PROGRAMS.find(function(p){ return p.slug === r.program_slug; });
+        var d = new Date(r.created_at).toLocaleDateString('en-IN', { dateStyle: 'medium' });
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);">' +
+          '<div><div style="font-size:13.5px;font-weight:500;">' + esc(prog ? prog.name : r.program_slug) + '</div>' +
+          '<div style="font-family:var(--font-mono);font-size:9.5px;color:var(--ink-3);letter-spacing:.6px;margin-top:2px;">' + d + '</div></div>' +
+          '<span style="font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:999px;background:rgba(46,139,87,.12);color:var(--green);">SENT</span>' +
+        '</div>';
+      }).join('');
+    });
+}
+
+/* ── INIT ── */
+window.addEventListener('load', async function() {
+  /* Demo mode */
+  var _demo = null;
+  try { _demo = JSON.parse(sessionStorage.getItem('btc-demo-session') || 'null'); } catch(_) {}
+  if (_demo) {
+    _isDemo = true;
+    _volName = _demo.name || 'Demo User';
+    document.getElementById('welcome-name').textContent = _volName + '.';
+    document.getElementById('sb-avatar').textContent = 'D';
+    document.getElementById('sb-user-name').textContent = _volName;
+    var today = new Date().toISOString().slice(0, 10);
+    document.getElementById('log-date').value = today;
+    document.body.classList.add('auth-ready');
+    document.getElementById('signout-btn').addEventListener('click', function() {
+      sessionStorage.removeItem('btc-demo-session');
+      window.location.href = '../login.html';
+    });
+    loadMyEventsDash();
+    return;
+  }
+
+  /* Real Supabase auth */
+  if (!window.SUPABASE_CONFIG || !window.supabase) return;
+  _SB = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
+
+  var res = await _SB.auth.getSession();
+  if (!res.data || !res.data.session) {
+    sessionStorage.setItem('btc-auth-next', window.location.pathname);
+    window.location.href = '../login.html'; return;
+  }
+  var session = res.data.session;
+  _uid = session.user.id;
+
+  var profRes = await _SB.from('profiles').select('role, display_name, profile_complete, occupation_type').eq('user_id', _uid).maybeSingle();
+  var profile = profRes.data || {};
+  if (profile.role !== 'volunteer' && profile.role !== 'admin') {
+    window.location.href = profile.role === 'kid' ? 'kids.html' : '../login.html'; return;
+  }
+
+  _volName = profile.display_name || session.user.email.split('@')[0];
+  document.getElementById('welcome-name').textContent = _volName + '.';
+
+  /* Show registration modal on first login */
+  if (!profile.profile_complete || !profile.occupation_type) {
+    document.getElementById('vreg-name').value = _volName;
+    document.getElementById('vol-reg-overlay').classList.remove('is-hidden');
+  }
+  document.getElementById('sb-avatar').textContent = _volName[0].toUpperCase();
+  document.getElementById('sb-user-name').textContent = _volName;
+
+  var today = new Date().toISOString().slice(0, 10);
+  document.getElementById('log-date').value = today;
+
+  document.body.classList.add('auth-ready');
+  loadMyEventsDash();
+
+  document.getElementById('signout-btn').addEventListener('click', async function() {
+    await _SB.auth.signOut();
+    window.location.href = '../login.html';
+  });
+
+  /* Log hours form */
+  document.getElementById('log-hours-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var program = document.getElementById('log-program').value;
+    var date = document.getElementById('log-date').value;
+    var hours = parseFloat(document.getElementById('log-hours').value);
+    var children = parseInt(document.getElementById('log-children').value) || 0;
+    var notes = document.getElementById('log-notes').value.trim();
+    if (!date || isNaN(hours) || hours <= 0) { showToast('Please fill in date and hours.'); return; }
+
+    var btn = document.getElementById('log-submit-btn');
+    btn.disabled = true; btn.textContent = 'Saving...';
+    try {
+      var storyText = 'Volunteer hours log: ' + hours + 'h on ' + program + '. Children reached: ' + children + (notes ? '. Notes: ' + notes : '');
+      var ins = await _SB.from('submissions').insert({
+        submitter_name: _volName,
+        submitter_role: 'volunteer',
+        submitter_user_id: _uid,
+        program_slug: program,
+        event_date: date,
+        story_text: storyText,
+        status: 'pending',
+      });
+      if (ins.error) throw ins.error;
+      var resultEl = document.getElementById('log-result');
+      resultEl.textContent = 'Hours logged. Thank you!';
+      resultEl.style.display = 'block';
+      setTimeout(function(){ resultEl.style.display = 'none'; }, 3500);
+      this.reset();
+      document.getElementById('log-date').value = today;
+      showToast('Hours logged successfully.');
+      loadLogHistory();
+    } catch(err) {
+      showToast('Could not save: ' + (err.message || 'error'));
+    } finally {
+      btn.disabled = false; btn.textContent = 'Submit hours';
+    }
+  });
+});
+
+function _skipVolReg() {
+  document.getElementById('vol-reg-overlay').classList.add('is-hidden');
+}
+async function _submitVolReg() {
+  var name    = document.getElementById('vreg-name').value.trim();
+  var mobile  = document.getElementById('vreg-mobile').value.trim();
+  var occ     = document.getElementById('vreg-occ').value;
+  var edu     = document.getElementById('vreg-edu').value.trim();
+  var contrib = document.getElementById('vreg-contrib').value.trim();
+  var project = document.getElementById('vreg-project').value;
+  if (!name || !mobile || !occ || !edu || !contrib || !project) {
+    alert('Please fill in all fields.'); return;
+  }
+  var btn = document.getElementById('vol-reg-submit');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    var up = await _SB.from('profiles').update({
+      display_name: name,
+      phone: mobile,
+      occupation_type: occ,
+      education_background: edu,
+      contribution_area: contrib,
+      preferred_project: project,
+      profile_complete: true
+    }).eq('user_id', _uid);
+    if (up.error) throw up.error;
+    _volName = name;
+    document.getElementById('welcome-name').textContent = name + '.';
+    document.getElementById('sb-avatar').textContent = name[0].toUpperCase();
+    document.getElementById('sb-user-name').textContent = name;
+    _skipVolReg();
+  } catch(e) {
+    alert('Could not save: ' + e.message);
+    btn.disabled = false; btn.textContent = 'Save & Continue';
+  }
+}
+</script>
+
+<nav class="vol-bnav" aria-label="Bottom navigation">
+  <button class="vol-bnav-item is-active" onclick="showSection('dashboard');_setBnav(this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    <span class="vol-bnav-label">Home</span>
+  </button>
+  <button class="vol-bnav-item" onclick="showSection('events');_setBnav(this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span class="vol-bnav-label">Events</span>
+  </button>
+  <button class="vol-bnav-item" onclick="showSection('photos');_setBnav(this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    <span class="vol-bnav-label">Photos</span>
+  </button>
+  <button class="vol-bnav-item" onclick="showSection('programs');_setBnav(this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    <span class="vol-bnav-label">Programs</span>
+  </button>
+  <button class="vol-bnav-item" onclick="showSection('log');_setBnav(this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+    <span class="vol-bnav-label">Log</span>
+  </button>
+</nav>
+<script>
+function _setBnav(btn) {
+  document.querySelectorAll('.vol-bnav-item').forEach(function(b){ b.classList.remove('is-active'); });
+  btn.classList.add('is-active');
+}
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js').catch(function(err) {
+      console.warn('[BTC] SW registration failed:', err);
+    });
+  });
+}
+</script>
+</body>
+</html>

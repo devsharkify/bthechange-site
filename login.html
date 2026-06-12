@@ -1,0 +1,776 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#ffffff" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="B The Change" />
+<meta name="robots" content="noindex" />
+<link rel="manifest" href="manifest.json" />
+<title>Sign in · B The Change</title>
+<link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/style.css" />
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script defer src="assets/supabase-config.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+
+  body {
+    min-height: 100svh;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ── SCREEN WRAPPER ─────────────────────────── */
+  .ls-wrap {
+    width: 100%;
+    max-width: 420px;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    padding: env(safe-area-inset-top, 0) 0 env(safe-area-inset-bottom, 0);
+  }
+
+  /* Desktop: show as centered card */
+  @media (min-width: 520px) {
+    body { background: #F2F2F0; align-items: center; justify-content: center; padding: 32px 16px; }
+    .ls-wrap {
+      min-height: unset;
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+  }
+
+  /* ── BACK NAV ────────────────────────────────── */
+  .ls-back {
+    padding: 16px 20px 0;
+    display: flex;
+    align-items: center;
+  }
+  .ls-back a {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--mute);
+    text-decoration: none;
+  }
+  .ls-back a:hover { color: var(--ink); }
+  .ls-back-btn {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 1.5px solid var(--line);
+    background: none;
+    display: grid; place-items: center;
+    cursor: pointer;
+    color: var(--ink);
+    font-size: 14px;
+    transition: background 0.15s;
+    flex-shrink: 0;
+  }
+  .ls-back-btn:hover { background: var(--paper-2); }
+
+  /* ── BRAND HERO ──────────────────────────────── */
+  .ls-hero {
+    padding: 32px 24px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .ls-logo-ring {
+    width: 72px; height: 72px;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 16px rgba(30,58,111,0.14);
+  }
+  .ls-logo-ring img { width: 100%; height: 100%; object-fit: cover; }
+  .ls-org-name {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin: 0;
+  }
+
+  /* ── STEP BODY ───────────────────────────────── */
+  .ls-step { display: none; flex-direction: column; flex: 1; padding: 24px 20px 32px; }
+  .ls-step.is-active { display: flex; }
+
+  .ls-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .ls-eyebrow::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .ls-title {
+    font-size: clamp(22px, 6vw, 28px);
+    font-weight: 600;
+    letter-spacing: -0.6px;
+    line-height: 1.15;
+    color: var(--ink);
+    margin: 0 0 6px;
+  }
+  .ls-sub {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 14px;
+    color: var(--ink-3);
+    margin: 0 0 24px;
+    line-height: 1.4;
+  }
+
+  /* ── PORTAL CARDS ────────────────────────────── */
+  .ls-portals { display: flex; flex-direction: column; gap: 10px; }
+
+  .ls-portal {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    border: 1.5px solid var(--line);
+    border-radius: 14px;
+    background: #fff;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    transition: border-color 0.14s, background 0.14s, box-shadow 0.14s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .ls-portal:active { background: #F0F4FF; border-color: var(--accent); }
+  .ls-portal.is-selected {
+    border-color: var(--accent);
+    background: #EEF3FF;
+    box-shadow: 0 0 0 3px rgba(30,58,111,0.08);
+  }
+
+  .ls-portal-ic {
+    width: 44px; height: 44px; flex-shrink: 0;
+    border-radius: 12px;
+    background: var(--paper-2);
+    display: grid; place-items: center;
+    color: var(--ink-2);
+    transition: background 0.14s, color 0.14s;
+  }
+  .ls-portal.is-selected .ls-portal-ic { background: var(--accent); color: #fff; }
+
+  .ls-portal-body { flex: 1; min-width: 0; }
+  .ls-portal-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0 0 2px;
+    line-height: 1.2;
+  }
+  .ls-portal-hint {
+    font-size: 12px;
+    color: var(--ink-3);
+    margin: 0;
+    line-height: 1.35;
+  }
+
+  .ls-portal-chev {
+    color: var(--mute);
+    flex-shrink: 0;
+    transition: color 0.14s, transform 0.14s;
+  }
+  .ls-portal:hover .ls-portal-chev,
+  .ls-portal.is-selected .ls-portal-chev { color: var(--accent); transform: translateX(2px); }
+
+  /* ── EMAIL STEP ──────────────────────────────── */
+  .ls-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px 4px 7px;
+    border-radius: 20px;
+    background: #EEF3FF;
+    border: 1px solid rgba(30,58,111,0.14);
+    font-family: var(--font-mono);
+    font-size: 9px; font-weight: 700;
+    letter-spacing: 1.2px; text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    align-self: flex-start;
+  }
+  .ls-badge svg { flex-shrink: 0; }
+
+  /* ── OTP BOXES ───────────────────────────────── */
+  .ls-otp {
+    display: flex; gap: 8px; margin-top: 20px;
+  }
+  .ls-otp input {
+    flex: 1; min-width: 0;
+    padding: 14px 4px;
+    font-size: 24px; font-weight: 700;
+    text-align: center;
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    background: var(--paper);
+    color: var(--ink);
+    transition: border-color 0.14s;
+    -webkit-appearance: none;
+  }
+  .ls-otp input:focus { outline: none; border-color: var(--accent); }
+  .ls-otp input.is-filled { border-color: var(--accent); background: #F5F8FF; }
+
+  /* ── FOOTER LINKS ────────────────────────────── */
+  .ls-foot {
+    padding: 0 20px 28px;
+    text-align: center;
+    margin-top: auto;
+  }
+  .ls-foot a {
+    font-family: var(--font-mono);
+    font-size: 9px; font-weight: 700;
+    letter-spacing: 1.3px; text-transform: uppercase;
+    color: var(--mute); text-decoration: none;
+  }
+  .ls-foot a:hover { color: var(--ink); }
+
+  /* ── PROGRESS DOTS ───────────────────────────── */
+  .ls-dots {
+    display: flex; gap: 5px; justify-content: center;
+    padding: 20px 0 8px;
+  }
+  .ls-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--line);
+    transition: background 0.2s, width 0.2s;
+  }
+  .ls-dot.is-active { background: var(--accent); width: 18px; border-radius: 3px; }
+  .ls-dot.is-done { background: rgba(30,58,111,0.3); }
+
+  /* ── SUCCESS CHECK ───────────────────────────── */
+  .ls-check {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: rgba(46,139,87,0.1);
+    border: 1.5px solid rgba(46,139,87,0.35);
+    display: grid; place-items: center;
+    color: var(--success);
+    margin-bottom: 18px;
+    align-self: flex-start;
+  }
+
+  /* ── SHARED FIELD OVERRIDES ──────────────────── */
+  .ls-label {
+    font-family: var(--font-mono);
+    font-size: 9.5px; font-weight: 700;
+    letter-spacing: 1.3px; text-transform: uppercase;
+    color: var(--ink-2);
+    margin: 0 0 6px;
+    display: block;
+  }
+  .ls-input {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 15px;
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    transition: border-color 0.14s;
+    -webkit-appearance: none;
+  }
+  .ls-input:focus { outline: none; border-color: var(--accent); }
+  .ls-helper {
+    font-size: 12px; color: var(--ink-3);
+    margin: 6px 0 0; line-height: 1.4;
+  }
+  .ls-error {
+    font-size: 12.5px; color: #C42828;
+    margin: 6px 0 0;
+    display: none;
+  }
+  .ls-btn {
+    width: 100%;
+    padding: 15px;
+    background: var(--accent);
+    color: #fff;
+    border: none; border-radius: 14px;
+    font-size: 15px; font-weight: 600;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    margin-top: 20px;
+    transition: opacity 0.15s, transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .ls-btn:active { opacity: 0.85; transform: scale(0.98); }
+  .ls-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+  .ls-resend {
+    font-size: 13px; color: var(--ink-3);
+    margin: 14px 0 0; text-align: center;
+  }
+  .ls-resend span.is-active {
+    color: var(--accent); cursor: pointer; font-weight: 600;
+  }
+
+  .ls-redirect-msg {
+    font-family: var(--font-mono);
+    font-size: 11px; color: var(--mute);
+    letter-spacing: 1px; margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+<div id="btc-toast-stack" class="btc-toast-stack" aria-live="polite" aria-atomic="true"></div>
+
+<div class="ls-wrap">
+
+  <!-- Brand hero (always visible) -->
+  <div class="ls-hero">
+    <div class="ls-logo-ring">
+      <img src="assets/bthechange-logo.png" alt="B The Change" />
+    </div>
+    <p class="ls-org-name">B The Change</p>
+  </div>
+
+  <!-- Progress dots -->
+  <div class="ls-dots">
+    <div class="ls-dot is-active" data-for="1"></div>
+    <div class="ls-dot" data-for="2"></div>
+    <div class="ls-dot" data-for="3"></div>
+  </div>
+
+  <!-- STEP 1: Choose portal -->
+  <section class="ls-step is-active" data-step="1">
+    <div class="ls-eyebrow">Choose your portal</div>
+    <h1 class="ls-title">Who are you<br />signing in as?</h1>
+    <p class="ls-sub">Tap to continue to your console.</p>
+
+    <div class="ls-portals">
+
+      <button type="button" class="ls-portal" data-role="kid">
+        <div class="ls-portal-ic">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="6" width="20" height="12" rx="1.5"/><path d="M8 22h8M12 18v4"/></svg>
+        </div>
+        <div class="ls-portal-body">
+          <p class="ls-portal-name">Student</p>
+          <p class="ls-portal-hint">Coding on Wheels, Launchpad & learning programs</p>
+        </div>
+        <svg class="ls-portal-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+
+      <button type="button" class="ls-portal" data-role="volunteer">
+        <div class="ls-portal-ic">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="ls-portal-body">
+          <p class="ls-portal-name">Volunteer</p>
+          <p class="ls-portal-hint">Mentors, teachers & program supporters</p>
+        </div>
+        <svg class="ls-portal-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+
+      <button type="button" class="ls-portal" data-role="admin">
+        <div class="ls-portal-ic">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </div>
+        <div class="ls-portal-body">
+          <p class="ls-portal-name">Admin / Team</p>
+          <p class="ls-portal-hint">BTC staff and organisation administrators</p>
+        </div>
+        <svg class="ls-portal-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+
+    </div>
+
+  </section>
+
+  <!-- STEP 2: Mobile number -->
+  <section class="ls-step" data-step="2">
+    <div class="ls-back">
+      <button class="ls-back-btn" id="ls-back-to-1" aria-label="Back">←</button>
+    </div>
+
+    <div style="padding: 4px 0 0;">
+      <div class="ls-badge" id="ls-portal-badge">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>
+        <span id="ls-portal-badge-label">Student</span>
+      </div>
+
+      <div class="ls-eyebrow">Enter your mobile</div>
+      <h2 class="ls-title">What's your<br />mobile number?</h2>
+      <p class="ls-sub">We'll send a 6-digit OTP to verify it's you.</p>
+
+      <label class="ls-label" for="ls-phone">MOBILE NUMBER</label>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <div style="padding:14px 14px; border:1.5px solid var(--line); border-radius:12px; font-size:15px; font-weight:600; color:var(--ink-2); background:var(--paper-2); white-space:nowrap; flex-shrink:0;">🇮🇳 +91</div>
+        <input type="tel" id="ls-phone" class="ls-input" placeholder="98765 43210" autocomplete="tel" inputmode="numeric" maxlength="10" style="flex:1;" />
+      </div>
+      <div id="ls-phone-error" class="ls-error"></div>
+      <p class="ls-helper">10-digit Indian mobile number. OTP sent via SMS.</p>
+      <button class="ls-btn" id="ls-send-btn">Send OTP →</button>
+    </div>
+  </section>
+
+  <!-- STEP 3: OTP -->
+  <section class="ls-step" data-step="3">
+    <div class="ls-back">
+      <button class="ls-back-btn" id="ls-back-to-2" aria-label="Back">←</button>
+    </div>
+
+    <div style="padding: 4px 0 0;">
+      <div class="ls-eyebrow">Verify it's you</div>
+      <h2 class="ls-title">Check your<br /><em style="font-family:var(--font-serif);font-style:italic;font-weight:400;">messages.</em></h2>
+      <p class="ls-sub">6-digit OTP sent to <strong id="ls-otp-phone">...</strong>.<br /><a id="ls-wrong-phone" style="color:var(--accent);cursor:pointer;font-style:normal;font-family:var(--font-sans);font-weight:600;">Wrong number?</a></p>
+
+      <div class="ls-otp" id="ls-otp-boxes">
+        <input type="text" maxlength="1" inputmode="numeric" aria-label="Digit 1" />
+        <input type="text" maxlength="1" inputmode="numeric" aria-label="Digit 2" />
+        <input type="text" maxlength="1" inputmode="numeric" aria-label="Digit 3" />
+        <input type="text" maxlength="1" inputmode="numeric" aria-label="Digit 4" />
+        <input type="text" maxlength="1" inputmode="numeric" aria-label="Digit 5" />
+        <input type="text" maxlength="1" inputmode="numeric" aria-label="Digit 6" />
+      </div>
+      <div id="ls-otp-error" class="ls-error"></div>
+      <button class="ls-btn" id="ls-verify-btn">Verify &amp; sign in →</button>
+      <p class="ls-resend">Didn't get it? <span id="ls-resend">Resend in 0:42</span></p>
+    </div>
+  </section>
+
+  <!-- STEP 4: Welcome -->
+  <section class="ls-step" data-step="4">
+    <div class="ls-check">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div class="ls-eyebrow" style="color: var(--success);">You're in</div>
+    <h2 class="ls-title">Welcome to<br /><em style="font-family:var(--font-serif);font-style:italic;font-weight:400;">the change.</em></h2>
+    <p class="ls-sub">Taking you to your console...</p>
+    <p class="ls-redirect-msg" id="ls-redirect-msg"></p>
+    <button class="ls-btn" id="ls-go-btn" style="display:none;">Go now →</button>
+  </section>
+
+</div>
+
+<script>
+window.btcToast = function(msg, type, dur) {
+  type = type||'info'; dur = dur||4000;
+  var stack = document.getElementById('btc-toast-stack'); if (!stack) return;
+  var el = document.createElement('div');
+  el.className = 'btc-toast btc-toast--' + type;
+  el.innerHTML = '<span class="btc-toast-msg">' + msg + '</span><button class="btc-toast-close" aria-label="Dismiss">×</button>';
+  stack.appendChild(el);
+  var dismiss = function() { el.classList.add('is-leaving'); setTimeout(function(){ el.remove(); }, 250); };
+  el.querySelector('.btc-toast-close').addEventListener('click', dismiss);
+  setTimeout(dismiss, dur);
+};
+</script>
+
+<script>
+(function() {
+  var SB = null;
+  var _session = null;
+  var _resendTimer = null;
+  var _role = null;
+  var _phone = null;   // 10-digit number
+  var _otp = null;     // 6-digit string generated client-side
+
+  var LABELS = { kid: 'Student', volunteer: 'Volunteer', admin: 'Admin / Team' };
+
+  function getSB() {
+    if (SB) return SB;
+    if (!window.SUPABASE_CONFIG || !window.supabase) return null;
+    SB = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
+    return SB;
+  }
+
+  function consoleUrl(role) {
+    return ({ kid: 'console/kids.html', volunteer: 'console/volunteer.html', admin: 'admin.html', partner: 'console/volunteer.html' })[role] || 'my.html';
+  }
+
+  /* Generate 6-digit OTP */
+  function genOtp() {
+    return String(Math.floor(100000 + Math.random() * 900000));
+  }
+
+  /* Demo bypass: 9999999999 → OTP always 999999, no SMS sent */
+  var DEMO_PHONE = '9999999999';
+  var DEMO_OTP   = '999999';
+
+  /* Send OTP via Authkey.io DLT template (SID-based).
+     Template: "Use {#otp#} as your OTP to access your {#company#}, OTP is confidential and valid for 5 mins" */
+  async function sendAuthkeyOtp(phone, otp) {
+    if (phone === DEMO_PHONE) { _otp = DEMO_OTP; return; } /* demo mode — no SMS */
+    var cfg = window.AUTHKEY_CONFIG;
+    if (!cfg || !cfg.key) throw new Error('SMS not configured. Contact support@bthechange.in.');
+    var url = 'https://api.authkey.io/request'
+            + '?authkey='      + encodeURIComponent(cfg.key)
+            + '&mobile='       + encodeURIComponent(phone)
+            + '&country_code=91'
+            + '&sid='          + encodeURIComponent(cfg.sid || '35306')
+            + '&otp='          + encodeURIComponent(otp)
+            + '&company='      + encodeURIComponent(cfg.company || 'B The Change');
+    try {
+      var r = await fetch(url);
+      var body = await r.text();
+      /* Authkey returns {"Message":"Submitted Successfully","LogID":"..."} on success */
+      try {
+        var json = JSON.parse(body);
+        if (json.Message && json.Message.toLowerCase().includes('submitted')) return;
+        if (json.type === 'error' || (json.Message && !json.Message.toLowerCase().includes('submitted'))) {
+          throw new Error(json.Message || json.message || 'SMS delivery failed.');
+        }
+      } catch(parseErr) {
+        if (parseErr.message && parseErr.message !== 'SMS delivery failed.') throw parseErr;
+      }
+    } catch(networkErr) {
+      /* In Capacitor / Android WebView the fetch may fail with CORS / TypeError.
+         Fall back to no-cors fire-and-forget — the SMS is still delivered. */
+      if (networkErr instanceof TypeError || (networkErr.message && networkErr.message.includes('fetch'))) {
+        try { fetch(url, { mode: 'no-cors' }); } catch(_) {}
+        return; /* assume sent — user will see if SMS doesn't arrive */
+      }
+      throw networkErr;
+    }
+  }
+
+  /* After phone OTP verified: sign into Supabase using phone-derived credentials.
+     Requires email confirmation DISABLED in Supabase Auth settings. */
+  async function signInWithPhone(sb, phone) {
+    var email = 'btc91' + phone + '@bthechange.in';
+    var pw = 'BTC_' + phone + '_welfare2006';
+    /* Try sign in first */
+    var si = await sb.auth.signInWithPassword({ email: email, password: pw });
+    if (!si.error) { return si.data.session; }
+    /* User doesn't exist — sign up (auto-confirms when email confirm is OFF) */
+    var su = await sb.auth.signUp({ email: email, password: pw, options: { data: { phone: '+91' + phone } } });
+    if (su.error) throw su.error;
+    if (su.data && su.data.session) return su.data.session;
+    /* Some Supabase configs require a second signIn after signUp */
+    var si2 = await sb.auth.signInWithPassword({ email: email, password: pw });
+    if (si2.error) throw si2.error;
+    return si2.data.session;
+  }
+
+  /* Progress dots */
+  function updateDots(n) {
+    document.querySelectorAll('.ls-dot').forEach(function(d) {
+      var f = parseInt(d.dataset.for, 10);
+      d.classList.remove('is-active', 'is-done');
+      if (f === n) d.classList.add('is-active');
+      else if (f < n) d.classList.add('is-done');
+    });
+  }
+
+  function goTo(n) {
+    document.querySelectorAll('.ls-step').forEach(function(s) {
+      s.classList.toggle('is-active', parseInt(s.dataset.step, 10) === n);
+    });
+    updateDots(n);
+    window.scrollTo(0, 0);
+    if (n === 3) { startResendTimer(); setTimeout(function(){ document.querySelector('#ls-otp-boxes input').focus(); }, 80); }
+    if (n === 2) { setTimeout(function(){ document.getElementById('ls-phone').focus(); }, 80); }
+  }
+
+  function showErr(id, msg) { var e = document.getElementById(id); if (e) { e.textContent = msg; e.style.display = 'block'; } }
+  function hideErr(id) { var e = document.getElementById(id); if (e) e.style.display = 'none'; }
+
+  /* Auto-redirect if already signed in */
+  window.addEventListener('load', async function() {
+    var sb = getSB(); if (!sb) return;
+    var res = await sb.auth.getSession();
+    if (res.data && res.data.session) {
+      _session = res.data.session;
+      var pr = await sb.from('profiles').select('role').eq('user_id', _session.user.id).maybeSingle();
+      var role = (pr.data && pr.data.role) ? pr.data.role : 'volunteer';
+      goToWelcome(role);
+    }
+  });
+
+  /* STEP 1: portal tap → step 2 */
+  document.querySelectorAll('.ls-portal').forEach(function(card) {
+    card.addEventListener('click', function() {
+      _role = card.dataset.role;
+      document.querySelectorAll('.ls-portal').forEach(function(c){ c.classList.remove('is-selected'); });
+      card.classList.add('is-selected');
+      document.getElementById('ls-portal-badge-label').textContent = LABELS[_role] || _role;
+      goTo(2);
+    });
+  });
+
+  document.getElementById('ls-back-to-1').addEventListener('click', function() { goTo(1); });
+
+  /* STEP 2: send OTP via Authkey */
+  document.getElementById('ls-send-btn').addEventListener('click', async function() {
+    hideErr('ls-phone-error');
+    var raw = document.getElementById('ls-phone').value.replace(/\D/g, '');
+    if (raw.length !== 10) {
+      document.getElementById('ls-phone').style.borderColor = '#C42828';
+      showErr('ls-phone-error', 'Please enter a valid 10-digit mobile number.');
+      return;
+    }
+    document.getElementById('ls-phone').style.borderColor = '';
+    var btn = document.getElementById('ls-send-btn');
+    btn.disabled = true; btn.textContent = 'Sending OTP...';
+    try {
+      _otp = genOtp();
+      _phone = raw;
+      await sendAuthkeyOtp(raw, _otp);
+      document.getElementById('ls-otp-phone').textContent = '+91 ' + raw.slice(0,5) + ' ' + raw.slice(5);
+      goTo(3);
+    } catch(e) {
+      showErr('ls-phone-error', (e && e.message) || 'Could not send OTP. Try again.');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Send OTP →';
+    }
+  });
+  document.getElementById('ls-phone').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('ls-send-btn').click(); });
+  /* Only allow digits */
+  document.getElementById('ls-phone').addEventListener('input', function() {
+    this.value = this.value.replace(/\D/g, '').slice(0, 10);
+  });
+
+  /* Back OTP → phone */
+  document.getElementById('ls-back-to-2').addEventListener('click', function() { goTo(2); });
+  document.getElementById('ls-wrong-phone').addEventListener('click', function() { goTo(2); });
+
+  /* OTP inputs */
+  var otpBoxes = document.querySelectorAll('#ls-otp-boxes input');
+  otpBoxes.forEach(function(inp, i) {
+    inp.addEventListener('input', function(e) {
+      var v = e.target.value.replace(/\D/g, '').slice(0, 1);
+      e.target.value = v;
+      e.target.classList.toggle('is-filled', !!v);
+      if (v && i < otpBoxes.length - 1) otpBoxes[i+1].focus();
+    });
+    inp.addEventListener('keydown', function(e) { if (e.key === 'Backspace' && !e.target.value && i > 0) otpBoxes[i-1].focus(); });
+    inp.addEventListener('paste', function(e) {
+      var digits = (e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').slice(0,6);
+      if (digits.length === 6) {
+        e.preventDefault();
+        digits.split('').forEach(function(d, j) { if (otpBoxes[j]) { otpBoxes[j].value = d; otpBoxes[j].classList.add('is-filled'); } });
+        otpBoxes[5].focus();
+      }
+    });
+  });
+
+  /* STEP 3: verify OTP */
+  document.getElementById('ls-verify-btn').addEventListener('click', async function() {
+    hideErr('ls-otp-error');
+    var entered = Array.from(otpBoxes).map(function(x){ return x.value; }).join('');
+    if (entered.length !== 6) {
+      otpBoxes.forEach(function(i){ if (!i.value) i.style.borderColor = '#C42828'; });
+      showErr('ls-otp-error', 'Please enter all 6 digits.');
+      return;
+    }
+    otpBoxes.forEach(function(i){ i.style.borderColor = ''; });
+    if (entered !== _otp) {
+      showErr('ls-otp-error', 'Incorrect OTP. Please try again.');
+      return;
+    }
+    /* Demo bypass — skip Supabase entirely */
+    if (_phone === DEMO_PHONE) { goToWelcome(_role || 'volunteer'); return; }
+
+    var sb = getSB();
+    if (!sb || !_phone) { showErr('ls-otp-error', 'Session expired. Go back and try again.'); return; }
+    var btn = document.getElementById('ls-verify-btn');
+    btn.disabled = true; btn.textContent = 'Verifying...';
+    try {
+      _session = await signInWithPhone(sb, _phone);
+      await afterSignIn(sb);
+    } catch(e) {
+      showErr('ls-otp-error', (e && e.message) || 'Sign-in failed. Try again.');
+    } finally {
+      btn.disabled = false; btn.innerHTML = 'Verify &amp; sign in →';
+    }
+  });
+
+  async function afterSignIn(sb) {
+    var user = _session.user;
+    var pr = await sb.from('profiles').select('role').eq('user_id', user.id).maybeSingle();
+    var profile = pr.data;
+
+    if (_role === 'admin') {
+      var ar = await sb.from('admins').select('user_id').eq('user_id', user.id).maybeSingle();
+      goToWelcome(ar.data ? 'admin' : (profile && profile.role ? profile.role : 'volunteer'));
+      return;
+    }
+
+    var isNew = (Date.now() - new Date(user.created_at).getTime()) < 2 * 60 * 1000;
+    var roleToUse = (profile && profile.role) ? profile.role : (_role || 'volunteer');
+    if (isNew || !profile || !profile.role) {
+      await sb.from('profiles').update({ role: _role || 'volunteer' }).eq('user_id', user.id);
+      roleToUse = _role || 'volunteer';
+    }
+    goToWelcome(roleToUse);
+  }
+
+  function goToWelcome(role) {
+    var dest = consoleUrl(role);
+    var p = new URLSearchParams(window.location.search);
+    var next = p.get('next') || sessionStorage.getItem('btc-auth-next');
+    sessionStorage.removeItem('btc-auth-next');
+    if (next && next.startsWith('/') && !next.startsWith('//')) dest = next;
+    if (_phone === DEMO_PHONE) {
+      sessionStorage.setItem('btc-demo-session', JSON.stringify({ role: role, name: 'Demo User' }));
+    }
+    var msgs = { kid: 'Student Portal', volunteer: 'Volunteer Console', admin: 'Admin Console' };
+    document.getElementById('ls-redirect-msg').textContent = 'Opening ' + (msgs[role] || 'your console') + '...';
+    document.getElementById('ls-go-btn').style.display = '';
+    document.getElementById('ls-go-btn').addEventListener('click', function(){ window.location.href = dest; }, { once: true });
+    goTo(4);
+    setTimeout(function(){ window.location.href = dest; }, 1800);
+  }
+
+  /* Resend: regenerate OTP and resend via Authkey */
+  function startResendTimer() {
+    if (_resendTimer) clearInterval(_resendTimer);
+    var secs = 30;
+    var el = document.getElementById('ls-resend');
+    el.classList.remove('is-active');
+    var tick = function() {
+      if (secs <= 0) { clearInterval(_resendTimer); el.textContent = 'Resend OTP'; el.classList.add('is-active'); return; }
+      el.textContent = 'Resend in ' + String(secs) + 's';
+      secs--;
+    };
+    tick(); _resendTimer = setInterval(tick, 1000);
+  }
+  document.getElementById('ls-resend').addEventListener('click', async function(e) {
+    if (!e.target.classList.contains('is-active') || !_phone) return;
+    try {
+      _otp = genOtp();
+      await sendAuthkeyOtp(_phone, _otp);
+      startResendTimer();
+    } catch(err) {
+      showErr('ls-otp-error', (err && err.message) || 'Could not resend OTP.');
+    }
+  });
+
+})();
+</script>
+</body>
+</html>

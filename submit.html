@@ -1,0 +1,838 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#1E3A6F" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#142951" media="(prefers-color-scheme: dark)" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="B The Change" />
+<meta name="mobile-web-app-capable" content="yes" />
+<link rel="manifest" href="manifest.json" />
+<title>Share your story · B The Change Welfare Society</title>
+<meta name="description" content="Volunteers, partners, and beneficiaries — share your work, photos, and stories from B The Change programs across India and the UK." />
+
+<!-- OpenGraph (Facebook, LinkedIn, WhatsApp link previews) -->
+<meta property="og:site_name" content="B The Change Welfare Society" />
+<meta property="og:title" content="Share your story · B The Change Welfare Society" />
+<meta property="og:description" content="Volunteers, partners, and beneficiaries — share your work, photos, and stories from B The Change programs across India and the UK." />
+<meta property="og:image" content="https://bthechange.in/assets/bthechange-logo.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="en_IN" />
+
+<!-- Twitter card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Share your story · B The Change Welfare Society" />
+<meta name="twitter:description" content="Volunteers, partners, and beneficiaries — share your work, photos, and stories from B The Change programs across India and the UK." />
+<meta name="twitter:image" content="https://bthechange.in/assets/bthechange-logo.png" />
+
+<!-- Schema.org NGO markup -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "NGO",
+  "name": "B The Change Welfare Society",
+  "alternateName": "B The Change",
+  "url": "https://bthechange.in",
+  "logo": "https://bthechange.in/assets/bthechange-logo.png",
+  "foundingDate": "2006",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Rd Number 2, Visaka Nagar, Almasguda",
+    "addressLocality": "Hyderabad",
+    "addressRegion": "Telangana",
+    "postalCode": "500112",
+    "addressCountry": "IN"
+  },
+  "email": "support@bthechange.in",
+  "telephone": "+919000935898",
+  "sameAs": []
+}
+</script>
+
+<link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png" />
+<link rel="icon" type="image/png" sizes="512x512" href="assets/icon-512.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/style.css" />
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script defer src="assets/supabase-config.js"></script>
+<script defer src="assets/admin-bell.js"></script>
+
+<!-- Plausible analytics (privacy-friendly, GDPR-compliant). Replace data-domain after deploy. -->
+<script defer data-domain="bthechange.in" src="https://plausible.io/js/script.js"></script>
+
+<!-- Sentry browser SDK (uncomment + replace DSN after creating project) -->
+<!-- <script src="https://browser.sentry-cdn.com/7.105.0/bundle.tracing.min.js" crossorigin="anonymous"></script>
+<script>if (window.Sentry) Sentry.init({ dsn: 'YOUR_SENTRY_DSN', tracesSampleRate: 0.2 });</script> -->
+</head>
+<body>
+<a href="#main" class="skip">Skip to content</a>
+<div id="btc-toast-stack" class="btc-toast-stack" aria-live="polite" aria-atomic="true"></div>
+
+<div class="ann">
+  <div class="ann-inner">
+    <span><span class="ann-dot">●</span>&nbsp; SINCE 2006</span>
+    <span>·</span>
+    <span>REG NO 1538/2015</span>
+    <span>·</span>
+    <span>80G · 12A · CSR-1</span>
+    <span>·</span>
+    <span>NITI AAYOG TS/2023/0380583</span>
+  </div>
+</div>
+
+<header class="hdr" id="hdr">
+  <div class="hdr-inner">
+    <a class="brand" href="index.html" aria-label="B The Change Welfare Society">
+      <img src="assets/bthechange-logo.png" alt="B The Change Welfare Society" class="brand-logo" />
+    </a>
+    <nav class="nav" id="nav">
+      <a href="about.html">About</a>
+      <a href="team.html">Team</a>
+      <a href="index.html#programs">Programs</a>
+      <a href="awards.html" style="color: var(--accent);">Awards</a>
+      <a href="blog.html">Blog</a>
+      <a href="login.html" class="nav-signin-mobile">Sign in</a>
+      <a href="submit.html" class="nav-mobile-only hdr-user-mobile-link" style="display:none;">Share story</a>
+      <a href="my.html" class="nav-mobile-only hdr-user-mobile-link" style="display:none;">My submissions</a>
+      <a href="admin.html" class="nav-mobile-only hdr-admin-mobile-link" style="display:none;">Admin <span id="hdr-admin-mobile-count" style="color:var(--accent);"></span></a>
+      <a href="#" class="nav-mobile-only hdr-user-mobile-link" id="hdr-signout-mobile" style="display:none;">Sign out</a>
+    </nav>
+    <div class="hdr-cta">
+      <div class="hdr-user-menu" id="hdr-user-menu" style="display:none;">
+        <button class="hdr-user-btn" id="hdr-user-btn" aria-label="User menu" aria-expanded="false">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M4 21c0-4 4-7 8-7s8 3 8 7"/>
+          </svg>
+          <span class="hdr-user-pip" id="hdr-user-pip" style="display:none;"></span>
+        </button>
+        <div class="hdr-user-dropdown" id="hdr-user-dropdown" role="menu">
+          <a href="submit.html" role="menuitem">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg>
+            Share story
+          </a>
+          <a href="my.html" role="menuitem">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+            My submissions
+          </a>
+          <a href="admin.html" role="menuitem" id="hdr-dropdown-admin" style="display:none;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            Admin <span class="hdr-dropdown-count" id="hdr-dropdown-count" style="display:none;">0</span>
+          </a>
+          <div class="hdr-user-divider"></div>
+          <button type="button" class="hdr-user-signout" id="hdr-signout">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
+            Sign out
+          </button>
+        </div>
+      </div>
+      <a href="login.html" class="hdr-signin" id="hdr-signin-link">Sign in</a>
+      <a href="https://wa.me/919000935898?text=Hi%2C%20I%20want%20to%20partner%20with%20B%20The%20Change%20Welfare%20Society." target="_blank" rel="noopener" class="btn btn--ink">Partner with us</a>
+      <button class="menu-btn btn" aria-label="Toggle menu" id="menu-btn"><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero" style="padding: clamp(20px, 4vw, 40px) 0 clamp(24px, 4vw, 44px); border-bottom: 1px solid var(--line);">
+    <div class="wrap">
+      <div data-reveal>
+        <div class="kicker"><span class="mono accent">SHARE YOUR STORY · MEMBERS ONLY</span></div>
+        <h1 class="hero-h1" style="font-size: clamp(34px, 5.5vw, 72px); line-height: 1; margin: 12px 0 16px;">
+          Did you do the work? <em style="color: var(--accent);">Share it.</em>
+        </h1>
+        <p style="font-family: var(--font-serif); font-style: italic; font-size: clamp(15px, 1.3vw, 19px); line-height: 1.55; color: var(--ink-3); max-width: 60ch;">
+          Volunteers, teachers, parents, kids, partners, anyone who lived a moment from one of our programs. Submit a photo and the story behind it. We review every submission within 48 hours. Approved stories appear on the program's page as recent work.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap" style="max-width: 720px;">
+      <div id="auth-hint" class="auth-hint" style="display:none;">
+        <div>
+          <strong>Want to edit later?</strong> <span style="color: var(--ink-3);">Sign in first and you'll be able to edit your submission while it's pending review.</span>
+        </div>
+        <a href="my.html" class="btn btn--secondary" style="padding: 8px 14px; font-size: 12px;">Sign in →</a>
+      </div>
+      <div id="signed-in-as" class="auth-hint auth-hint--ok" style="display:none;">
+        <div>
+          <strong>Signed in.</strong> <span style="color: var(--ink-3);">Your submissions will show up on your <a href="my.html" style="color: var(--accent);">My submissions</a> page.</span>
+        </div>
+      </div>
+      <form id="submit-form" class="submit-form" data-reveal>
+        <div class="form-row">
+          <label class="form-label">Your name <span class="req">*</span></label>
+          <input type="text" name="submitter_name" required maxlength="80" placeholder="Priya Sharma" />
+        </div>
+        <div class="form-row form-row--2">
+          <div>
+            <label class="form-label">Your role <span class="req">*</span></label>
+            <select name="submitter_role" required>
+              <option value="">Select one</option>
+              <option value="volunteer">Volunteer</option>
+              <option value="admin">Admin / Staff</option>
+              <option value="kid">Student / Beneficiary</option>
+              <option value="beneficiary">Family / Community</option>
+              <option value="partner">Partner / Donor</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Email or WhatsApp</label>
+            <input type="text" name="submitter_contact" maxlength="120" placeholder="for follow-up only" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label">Which program? <span class="req">*</span></label>
+          <select name="program_slug" required>
+            <option value="">Select a program</option>
+            <option value="coding-on-wheels">Coding on Wheels</option>
+            <option value="changemakers">Changemakers</option>
+            <option value="organ-donation-on-wheels">Organ Donation Campaign on Wheels</option>
+            <option value="eko-warriors">EKO Warriors</option>
+            <option value="pawtection-force">PAWtection Force</option>
+            <option value="we-women-empowerment">WE: Women Empowerment</option>
+            <option value="global-human-rights-front">Global Human Rights Front</option>
+            <option value="cross-connect-legal-aid">Cross Connect Legal Aid</option>
+            <option value="dreamcatchers">DreamCatchers</option>
+            <option value="launchpad">Launchpad</option>
+            <option value="lawgic">L.A.W.G.I.C.</option>
+          </select>
+        </div>
+
+        <div class="form-row form-row--2">
+          <div>
+            <label class="form-label">Event name (optional)</label>
+            <input type="text" name="event_name" maxlength="120" placeholder="e.g. Tech Mahindra School visit" />
+          </div>
+          <div>
+            <label class="form-label">Date (optional)</label>
+            <input type="date" name="event_date" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label">Your story <span class="req">*</span></label>
+          <textarea name="story_text" required maxlength="2000" rows="6" placeholder="What happened? Who was there? What did you see, hear, feel? 1-3 paragraphs is perfect."></textarea>
+          <div class="form-help"><span id="char-count">0</span> / 2000 characters</div>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label">Upload a photo</label>
+          <div class="file-drop" id="file-drop">
+            <input type="file" id="image-input" name="image" accept="image/jpeg,image/png,image/webp" />
+            <div class="file-drop-prompt">
+              <div class="file-drop-icon">+</div>
+              <div class="file-drop-text">Tap to add photo<br><span>JPG / PNG / WebP, max 5MB</span></div>
+              <div class="file-drop-preview" id="file-preview"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-foot">
+          <p class="form-disclaimer">
+            By submitting you confirm you took or have rights to this image, and you give B The Change Welfare Society permission to publish it credited to you. Submissions are reviewed before going live.
+          </p>
+
+          <!-- hCaptcha (renders only if window.HCAPTCHA_SITE_KEY is set in supabase-config.js) -->
+          <div class="h-captcha-wrap" id="hcaptcha-wrap" style="display:none;">
+            <div class="h-captcha" id="hcaptcha-widget"></div>
+          </div>
+
+          <button type="submit" class="btn btn--accent btn--lg" id="submit-btn">
+            <span class="btn-text">Submit for review</span>
+            <span class="btn-loading" style="display:none;">Submitting...</span>
+            <span class="arrow">→</span>
+          </button>
+        </div>
+
+        <div id="submit-result" class="submit-result" style="display:none;"></div>
+      </form>
+    </div>
+  </section>
+</main>
+
+
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr-top">
+      <div class="ftr-brand">
+        <a class="brand" href="index.html" aria-label="B The Change Welfare Society">
+          <img src="assets/bthechange-logo.png" alt="B The Change Welfare Society" class="brand-logo brand-logo--lg" />
+        </a>
+        <p class="ftr-tag">"Real change is the slowest thing in the world. You sit with a family for ten years before you see it."</p>
+      </div>
+
+      <div class="ftr-col">
+        <h5>Reach us</h5>
+        <address class="ftr-addr">
+          <a href="https://share.google/wMmcZ4BGYnMA3Ulfx" target="_blank" rel="noopener" title="Open in Google Maps">Rd Number 2, Visaka Nagar, Almasguda, Hyderabad, Telangana 500112 <span style="opacity:.6;">↗</span></a>
+          <a href="mailto:support@bthechange.in">support@bthechange.in</a>
+          <a href="https://wa.me/919000935898?text=Hi%2C%20I%20want%20to%20reach%20B%20The%20Change%20Welfare%20Society." target="_blank" rel="noopener" class="ftr-wa">WhatsApp · +91 90009 35898</a>
+        </address>
+      </div>
+
+      <div class="ftr-col">
+        <h5>Get involved</h5>
+        <ul>
+          <li><a href="awards.html" style="color: var(--accent);">ChangeMaker Awards 2026</a></li>
+          <li><a href="https://wa.me/919000935898?text=Hi%2C%20I%20want%20to%20partner%20with%20B%20The%20Change%20Welfare%20Society." target="_blank" rel="noopener">Partner with us</a></li>
+          <li><a href="index.html#involve">Volunteer</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="team.html">Team</a></li>
+          <li><a href="index.html#programs">All 11 programs</a></li>
+          <li><a href="about.html#board">Board of trustees</a></li>
+          <li><a href="about.html#transparency">Annual reports</a></li>
+          <li><a href="press.html">Press kit</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ftr-bottom">
+      <div class="ftr-creds">
+        <span>REG <span>1538/2015</span></span>
+        <span class="ftr-dot" aria-hidden="true">·</span>
+        <span>NITI AAYOG <span>TS/2023/0380583</span></span>
+        <span class="ftr-dot" aria-hidden="true">·</span>
+        <span>80G &middot; 12A &middot; CSR-1</span>
+        <span class="ftr-dot" aria-hidden="true">·</span>
+        <span>© 2006-2026 B THE CHANGE</span>
+      </div>
+      <div class="ftr-social" aria-label="Social media">
+        <button id="btc-install-btn" hidden type="button" class="ftr-install" aria-label="Install B The Change app on your phone">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+          <span>Install app</span>
+        </button>
+        <a href="#" aria-label="Instagram"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.6" fill="currentColor"/></svg></a>
+        <a href="#" aria-label="LinkedIn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 11v6M8 8v.01M12 17v-4a2 2 0 0 1 4 0v4M12 11v6"/></svg></a>
+        <a href="#" aria-label="YouTube"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M10 9l5 3-5 3z" fill="currentColor"/></svg></a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<nav class="site-bnav" aria-label="Main navigation">
+  <a class="site-bnav-item" href="index.html" data-bnav="home">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span class="site-bnav-label">Home</span>
+  </a>
+  <a class="site-bnav-item" href="index.html#programs" data-bnav="programs">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    <span class="site-bnav-label">Programs</span>
+  </a>
+  <a class="site-bnav-item" href="blog.html" data-bnav="blog">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    <span class="site-bnav-label">Blog</span>
+  </a>
+  <a class="site-bnav-item" href="index.html#involve" data-bnav="involve">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    <span class="site-bnav-label">Volunteer</span>
+  </a>
+  <a class="site-bnav-item" href="login.html" data-bnav="account" id="site-bnav-account">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span class="site-bnav-label">Account</span>
+  </a>
+</nav>
+<script>
+(function(){
+  var p = window.location.pathname;
+  var map = { home: ['/index.html','/'], programs: ['/programs/'], blog: ['/blog.html','/blog-post.html','/blog-write.html'], account: ['/login.html','/my.html','/submit.html'] };
+  Object.keys(map).forEach(function(key){
+    var hits = map[key];
+    var match = hits.some(function(h){ return p === h || p.endsWith(h) || p.includes(h); });
+    if (match) { var el = document.querySelector('.site-bnav-item[data-bnav="' + key + '"]'); if (el) el.classList.add('is-active'); }
+  });
+})();
+</script>
+
+<div class="auth-modal" id="auth-modal" aria-hidden="true" role="dialog">
+  <div class="auth-card">
+    <button class="auth-close" id="auth-close" aria-label="Close sign in">×</button>
+    <div class="auth-steps">
+      <section class="auth-step is-active" data-step="1">
+        <div class="auth-brandbar">
+          <img src="assets/bthechange-logo.png" alt="B The Change Welfare Society" class="brand-logo brand-logo--lg" />
+          <span class="auth-reg-tag">REG NO 1538/2015</span>
+        </div>
+        <div class="auth-kicker"><span>SIGN IN · STEP 01 OF 02</span></div>
+        <h2 class="auth-h1">Don't <span class="strike">WAIT</span> for change.<br /><span class="be">Be</span> the change.</h2>
+        <p class="auth-lede">Sign in to share stories, volunteer, or manage submissions. We'll send a 6-digit code to verify it's you.</p>
+        <div class="auth-decor"><span></span></div>
+        <div class="auth-tabs">
+          <button class="auth-tab is-active" data-tab="email" type="button">Email</button>
+          <button class="auth-tab" data-tab="phone" type="button">Phone</button>
+        </div>
+        <label class="auth-label" for="auth-phone-input">EMAIL ADDRESS</label>
+        <div class="auth-phone-row is-email" id="auth-phone-row">
+          <div class="auth-cc">
+            <button class="auth-cc-btn" id="auth-cc-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+              <span class="auth-cc-flag">🇮🇳</span>
+              <span class="auth-cc-code" id="auth-cc-code">+91</span>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="auth-cc-list" id="auth-cc-list" role="listbox">
+              <button type="button" data-cc="+91" data-flag="🇮🇳" data-name="India">🇮🇳 India <span>+91</span></button>
+              <button type="button" data-cc="+1"  data-flag="🇺🇸" data-name="USA">🇺🇸 United States <span>+1</span></button>
+              <button type="button" data-cc="+44" data-flag="🇬🇧" data-name="UK">🇬🇧 United Kingdom <span>+44</span></button>
+              <button type="button" data-cc="+971" data-flag="🇦🇪" data-name="UAE">🇦🇪 UAE <span>+971</span></button>
+              <button type="button" data-cc="+61" data-flag="🇦🇺" data-name="Australia">🇦🇺 Australia <span>+61</span></button>
+              <button type="button" data-cc="+1" data-flag="🇨🇦" data-name="Canada">🇨🇦 Canada <span>+1</span></button>
+              <button type="button" data-cc="+65" data-flag="🇸🇬" data-name="Singapore">🇸🇬 Singapore <span>+65</span></button>
+              <button type="button" data-cc="+60" data-flag="🇲🇾" data-name="Malaysia">🇲🇾 Malaysia <span>+60</span></button>
+              <button type="button" data-cc="+966" data-flag="🇸🇦" data-name="Saudi Arabia">🇸🇦 Saudi Arabia <span>+966</span></button>
+              <button type="button" data-cc="+974" data-flag="🇶🇦" data-name="Qatar">🇶🇦 Qatar <span>+974</span></button>
+              <button type="button" data-cc="+49" data-flag="🇩🇪" data-name="Germany">🇩🇪 Germany <span>+49</span></button>
+              <button type="button" data-cc="+33" data-flag="🇫🇷" data-name="France">🇫🇷 France <span>+33</span></button>
+              <button type="button" data-cc="+81" data-flag="🇯🇵" data-name="Japan">🇯🇵 Japan <span>+81</span></button>
+              <button type="button" data-cc="+86" data-flag="🇨🇳" data-name="China">🇨🇳 China <span>+86</span></button>
+            </div>
+          </div>
+          <input type="email" id="auth-phone-input" class="auth-input" placeholder="you@example.com" autocomplete="email" />
+        </div>
+        <div id="auth-phone-warn" class="auth-warn" style="display:none;">Phone sign-in launching soon. Please use Email for now.</div>
+        <div id="auth-error" class="auth-error" style="display:none;"></div>
+        <p class="auth-helper">We'll never share your contact. Used only to verify it's you.</p>
+        <button class="btn btn--accent btn--block btn--lg" id="auth-phone-submit" type="button">Continue <span class="arrow">→</span></button>
+      </section>
+      <section class="auth-step" data-step="2">
+        <div class="auth-topbar">
+          <button class="auth-back" data-back-to="1" aria-label="Back">←</button>
+          <div class="auth-step-mono">STEP 02 OF 02</div>
+          <div style="flex:1"></div>
+        </div>
+        <div class="auth-kicker"><span>ENTER 6-DIGIT CODE</span></div>
+        <h2 class="auth-h1">Check your <em>inbox.</em></h2>
+        <p class="auth-lede">We sent a code to <span id="auth-otp-phone">...</span>.<br /><a data-back-to="1" class="auth-wrong">Wrong address?</a></p>
+        <div class="auth-otp" id="auth-otp-boxes">
+          <input type="text" maxlength="1" inputmode="numeric" aria-label="Digit 1" /><input type="text" maxlength="1" inputmode="numeric" aria-label="Digit 2" /><input type="text" maxlength="1" inputmode="numeric" aria-label="Digit 3" /><input type="text" maxlength="1" inputmode="numeric" aria-label="Digit 4" /><input type="text" maxlength="1" inputmode="numeric" aria-label="Digit 5" /><input type="text" maxlength="1" inputmode="numeric" aria-label="Digit 6" />
+        </div>
+        <div id="auth-otp-error" class="auth-error" style="display:none;"></div>
+        <button class="btn btn--accent btn--block btn--lg" id="auth-otp-verify" type="button">Verify &amp; continue <span class="arrow">→</span></button>
+        <p class="auth-resend">Didn't receive? <span id="auth-resend">Resend in 0:42</span></p>
+      </section>
+      <section class="auth-step" data-step="3">
+        <div class="auth-welcome-check">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="auth-kicker is-success centered"><span>YOU'RE IN</span></div>
+        <h2 class="auth-h1 centered">Welcome to <em>the change.</em></h2>
+        <p class="auth-lede centered">Your account is ready. Pick up where you left off, or start exploring.</p>
+        <button class="btn btn--accent btn--block btn--lg" id="auth-welcome-done" type="button" style="margin-top:18px;">Get started <span class="arrow">→</span></button>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+/* PWA: register service worker + install prompt */
+(function() {
+  if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/sw.js').catch(function(err) {
+        console.warn('[BTC] SW registration failed:', err);
+      });
+    });
+  }
+
+  // Capture beforeinstallprompt for "Install app" CTA
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', function(e) {
+    e.preventDefault();
+    deferredPrompt = e;
+    // Show our install button (if footer has one)
+    const btn = document.getElementById('btc-install-btn');
+    if (btn) {
+      btn.hidden = false;
+      btn.addEventListener('click', async function() {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted' && window.btcToast) {
+          window.btcToast('B The Change installed on your phone.', 'success');
+        }
+        deferredPrompt = null;
+        btn.hidden = true;
+      });
+    }
+  });
+
+  // Hide install button after install
+  window.addEventListener('appinstalled', function() {
+    const btn = document.getElementById('btc-install-btn');
+    if (btn) btn.hidden = true;
+  });
+})();
+</script>
+<script>
+/* GLOBAL TOAST — window.btcToast(msg, type='info'|'success'|'error', duration=4000) */
+window.btcToast = function(msg, type, duration) {
+  type = type || 'info';
+  duration = duration || 4000;
+  const stack = document.getElementById('btc-toast-stack');
+  if (!stack) return;
+  const el = document.createElement('div');
+  el.className = 'btc-toast btc-toast--' + type;
+  const ic = type === 'success' ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+            : type === 'error' ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+            : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+  el.innerHTML = '<span class="btc-toast-icon">' + ic + '</span><span class="btc-toast-msg">' + msg + '</span><button class="btc-toast-close" aria-label="Dismiss">×</button>';
+  stack.appendChild(el);
+  const dismiss = () => { el.classList.add('is-leaving'); setTimeout(() => el.remove(), 250); };
+  el.querySelector('.btc-toast-close').addEventListener('click', dismiss);
+  setTimeout(dismiss, duration);
+};
+const hdr = document.getElementById('hdr');
+window.addEventListener('scroll', () => hdr.classList.toggle('scrolled', window.scrollY > 8), { passive: true });
+const menuBtn = document.getElementById('menu-btn');
+const nav = document.getElementById('nav');
+menuBtn?.addEventListener('click', () => { nav.classList.toggle('is-open'); menuBtn.classList.toggle('is-active'); });
+nav?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => { nav.classList.remove('is-open'); menuBtn?.classList.remove('is-active'); }));
+const io = new IntersectionObserver((entries) => { entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } }); }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+document.querySelectorAll('[data-reveal]').forEach(el => io.observe(el));
+function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+function countUp(el) {
+  const target = parseFloat(el.dataset.count);
+  const decimals = parseInt(el.dataset.decimal || '0', 10);
+  const duration = 1400;
+  const start = performance.now();
+  function tick(now) {
+    const t = Math.min(1, (now - start) / duration);
+    const v = target * easeOut(t);
+    el.textContent = decimals > 0 ? v.toFixed(decimals) : Math.round(v).toLocaleString('en-IN');
+    if (t < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+const countObserver = new IntersectionObserver((entries) => { entries.forEach(e => { if (e.isIntersecting) { countUp(e.target); countObserver.unobserve(e.target); } }); }, { threshold: 0.5 });
+document.querySelectorAll('[data-count]').forEach(el => countObserver.observe(el));
+(function() {
+  const modal = document.getElementById('auth-modal'); if (!modal) return;
+  const closeBtn = document.getElementById('auth-close');
+  const steps = modal.querySelectorAll('.auth-step');
+  const stepsContainer = modal.querySelector('.auth-steps');
+  let resendInterval = null;
+  function open() { modal.classList.add('is-open'); modal.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden'; goTo(1); }
+  function close() { modal.classList.remove('is-open'); modal.setAttribute('aria-hidden', 'true'); document.body.style.overflow = ''; if (resendInterval) clearInterval(resendInterval); modal.querySelectorAll('#auth-otp-boxes input').forEach(i => { i.value = ''; i.classList.remove('is-filled'); }); }
+  function goTo(n) { steps.forEach(s => s.classList.toggle('is-active', parseInt(s.dataset.step, 10) === n)); stepsContainer.scrollTop = 0; if (n === 2) startResendTimer(); if (n === 1) setTimeout(() => modal.querySelector('#auth-phone-input')?.focus(), 50); if (n === 2) setTimeout(() => modal.querySelector('#auth-otp-boxes input')?.focus(), 50); }
+  /* Auto-open modal if URL has ?signin=1 (e.g. redirected from a gated page) */
+  if (new URLSearchParams(window.location.search).has('signin')) { open(); }
+  document.querySelectorAll('[data-auth-open]').forEach(b => b.addEventListener('click', e => { e.preventDefault(); open(); }));
+  closeBtn.addEventListener('click', close);
+  modal.addEventListener('click', e => { if (e.target === modal) close(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal.classList.contains('is-open')) close(); });
+  modal.querySelectorAll('[data-back-to]').forEach(b => b.addEventListener('click', () => goTo(parseInt(b.dataset.backTo, 10))));
+  /* Auth method tabs (Email default, Phone shows "coming soon" notice) */
+  const phoneWarn = document.getElementById('auth-phone-warn');
+  modal.querySelectorAll('.auth-tab').forEach(t => t.addEventListener('click', () => {
+    modal.querySelectorAll('.auth-tab').forEach(x => x.classList.remove('is-active'));
+    t.classList.add('is-active');
+    const input = modal.querySelector('#auth-phone-input');
+    const phoneRow = modal.querySelector('#auth-phone-row');
+    if (t.dataset.tab === 'email') {
+      input.type = 'email'; input.placeholder = 'you@example.com'; input.value = '';
+      input.classList.remove('auth-phone-input');
+      modal.querySelector('.auth-label').textContent = 'EMAIL ADDRESS';
+      if (phoneRow) phoneRow.classList.add('is-email');
+      if (phoneWarn) phoneWarn.style.display = 'none';
+    } else {
+      input.type = 'tel'; input.placeholder = '90009 35898'; input.value = '';
+      input.classList.add('auth-phone-input');
+      modal.querySelector('.auth-label').textContent = 'MOBILE NUMBER';
+      if (phoneRow) phoneRow.classList.remove('is-email');
+      if (phoneWarn) phoneWarn.style.display = 'block';
+    }
+    input.focus();
+  }));
+  /* Country code dropdown */
+  const ccBtn = document.getElementById('auth-cc-btn');
+  const ccList = document.getElementById('auth-cc-list');
+  const ccCode = document.getElementById('auth-cc-code');
+  const ccFlag = ccBtn ? ccBtn.querySelector('.auth-cc-flag') : null;
+  if (ccBtn && ccList) {
+    ccBtn.addEventListener('click', e => { e.stopPropagation(); const isOpen = ccList.classList.toggle('is-open'); ccBtn.setAttribute('aria-expanded', isOpen); });
+    document.addEventListener('click', e => { if (ccList.classList.contains('is-open') && !e.target.closest('.auth-cc')) { ccList.classList.remove('is-open'); ccBtn.setAttribute('aria-expanded', 'false'); }});
+    ccList.querySelectorAll('button').forEach(b => b.addEventListener('click', () => { ccCode.textContent = b.dataset.cc; ccFlag.textContent = b.dataset.flag; ccList.classList.remove('is-open'); ccBtn.setAttribute('aria-expanded', 'false'); modal.querySelector('#auth-phone-input').focus(); }));
+  }
+  /* SUPABASE OTP — real wiring */
+  let _SB = null;
+  function getSB() {
+    if (_SB) return _SB;
+    if (!window.SUPABASE_CONFIG || !window.supabase) return null;
+    _SB = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
+    return _SB;
+  }
+  let _pendingEmail = null;
+  const errEl = document.getElementById('auth-error');
+  const otpErrEl = document.getElementById('auth-otp-error');
+  function showErr(el, msg) { if (!el) return; el.textContent = msg; el.style.display = 'block'; }
+  function hideErr(el) { if (el) el.style.display = 'none'; }
+  document.getElementById('auth-phone-submit').addEventListener('click', async () => {
+    hideErr(errEl);
+    const input = document.getElementById('auth-phone-input');
+    const submitBtn = document.getElementById('auth-phone-submit');
+    const activeTab = modal.querySelector('.auth-tab.is-active').dataset.tab;
+    if (activeTab === 'phone') {
+      showErr(errEl, 'Phone sign-in is coming soon. Please switch to Email for now.');
+      return;
+    }
+    const email = input.value.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { input.style.borderColor = '#C42828'; input.focus(); showErr(errEl, 'Please enter a valid email address.'); return; }
+    input.style.borderColor = '';
+    const SB = getSB();
+    if (!SB) { showErr(errEl, 'Sign-in is not configured yet. Please contact support@bthechange.in.'); return; }
+    submitBtn.disabled = true; submitBtn.textContent = 'Sending code...';
+    try {
+      const { error } = await SB.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
+      if (error) throw error;
+      _pendingEmail = email;
+      document.getElementById('auth-otp-phone').textContent = email;
+      goTo(2);
+    } catch (e) {
+      showErr(errEl, (e && e.message) || 'Could not send code. Please try again.');
+    } finally {
+      submitBtn.disabled = false; submitBtn.innerHTML = 'Continue <span class="arrow">→</span>';
+    }
+  });
+  const otpInputs = modal.querySelectorAll('#auth-otp-boxes input');
+  otpInputs.forEach((inp, i) => {
+    inp.addEventListener('input', e => { const v = e.target.value.replace(/[^0-9]/g, '').slice(0, 1); e.target.value = v; e.target.classList.toggle('is-filled', !!v); if (v && i < otpInputs.length - 1) otpInputs[i + 1].focus(); });
+    inp.addEventListener('keydown', e => { if (e.key === 'Backspace' && !e.target.value && i > 0) otpInputs[i - 1].focus(); });
+    inp.addEventListener('paste', e => { const text = (e.clipboardData || window.clipboardData).getData('text'); const digits = text.replace(/[^0-9]/g, '').slice(0, 6); if (digits.length === 6) { e.preventDefault(); digits.split('').forEach((d, idx) => { if (otpInputs[idx]) { otpInputs[idx].value = d; otpInputs[idx].classList.add('is-filled'); } }); otpInputs[5].focus(); } });
+  });
+  document.getElementById('auth-otp-verify').addEventListener('click', async () => {
+    hideErr(otpErrEl);
+    const code = Array.from(otpInputs).map(x => x.value).join('');
+    if (code.length !== 6) { otpInputs.forEach(i => { if (!i.value) i.style.borderColor = '#C42828'; }); showErr(otpErrEl, 'Please enter all 6 digits.'); return; }
+    otpInputs.forEach(i => { i.style.borderColor = ''; });
+    const SB = getSB();
+    if (!SB || !_pendingEmail) { showErr(otpErrEl, 'Session expired. Go back and try again.'); return; }
+    const verifyBtn = document.getElementById('auth-otp-verify');
+    verifyBtn.disabled = true; verifyBtn.textContent = 'Verifying...';
+    try {
+      const { data, error } = await SB.auth.verifyOtp({ email: _pendingEmail, token: code, type: 'email' });
+      if (error) throw error;
+      if (!data || !data.session) throw new Error('Verification did not return a session.');
+      goTo(3);
+    } catch (e) {
+      showErr(otpErrEl, (e && e.message) || 'Code is incorrect or expired. Please try again.');
+    } finally {
+      verifyBtn.disabled = false; verifyBtn.innerHTML = 'Verify &amp; continue <span class="arrow">→</span>';
+    }
+  });
+  document.getElementById('auth-welcome-done').addEventListener('click', () => {
+    close();
+    /* If we landed on submit.html (or any auth-required page) via redirect, go there */
+    try {
+      const next = sessionStorage.getItem('btc-auth-next');
+      if (next) { sessionStorage.removeItem('btc-auth-next'); window.location.href = next; return; }
+    } catch (_) {}
+    /* Otherwise reload so admin-bell.js picks up the new session and reveals the user dropdown */
+    window.location.reload();
+  });
+  function startResendTimer() { if (resendInterval) clearInterval(resendInterval); let secs = 42; const link = document.getElementById('auth-resend'); link.classList.remove('is-active'); const tick = () => { if (secs <= 0) { clearInterval(resendInterval); link.textContent = 'Resend code'; link.classList.add('is-active'); return; } const m = String(Math.floor(secs / 60)); const s = String(secs % 60).padStart(2, '0'); link.textContent = 'Resend in ' + m + ':' + s; secs--; }; tick(); resendInterval = setInterval(tick, 1000); }
+  document.getElementById('auth-resend').addEventListener('click', async e => {
+    if (!e.target.classList.contains('is-active')) return;
+    if (!_pendingEmail) return;
+    const SB = getSB(); if (!SB) return;
+    try { await SB.auth.signInWithOtp({ email: _pendingEmail, options: { shouldCreateUser: true } }); startResendTimer(); }
+    catch (err) { showErr(otpErrEl, (err && err.message) || 'Could not resend.'); }
+  });
+
+  /* LEADERSHIP CAROUSEL */
+  const lTrack = document.getElementById('leader-track');
+  if (lTrack) {
+    const slides = lTrack.querySelectorAll('.leader-slide');
+    const total = slides.length;
+    const prevBtn = document.getElementById('leader-prev');
+    const nextBtn = document.getElementById('leader-next');
+    const counter = document.getElementById('leader-current');
+    const dots = document.querySelectorAll('.leader-dot');
+    let idx = 0;
+    const update = () => {
+      lTrack.style.transform = 'translateX(-' + (idx * 100) + '%)';
+      counter.textContent = (idx + 1);
+      prevBtn.disabled = idx === 0;
+      nextBtn.disabled = idx === total - 1;
+      dots.forEach((d, i) => d.classList.toggle('is-active', i === idx));
+    };
+    prevBtn.addEventListener('click', () => { if (idx > 0) { idx--; update(); } });
+    nextBtn.addEventListener('click', () => { if (idx < total - 1) { idx++; update(); } });
+    dots.forEach(d => d.addEventListener('click', () => { idx = parseInt(d.dataset.go, 10); update(); }));
+    /* Keyboard arrows when focused near the carousel */
+    document.addEventListener('keydown', e => {
+      if (!document.activeElement.closest('.leader-controls, .leader-dots, .leader-carousel')) return;
+      if (e.key === 'ArrowLeft' && idx > 0) { idx--; update(); }
+      if (e.key === 'ArrowRight' && idx < total - 1) { idx++; update(); }
+    });
+    /* Swipe support for touch */
+    let startX = 0;
+    lTrack.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
+    lTrack.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - startX;
+      if (Math.abs(dx) < 50) return;
+      if (dx < 0 && idx < total - 1) { idx++; update(); }
+      if (dx > 0 && idx > 0) { idx--; update(); }
+    });
+  }
+})();
+</script>
+</body>
+</html>
+
+<script>
+(function() {
+  const SB = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
+  const form = document.getElementById('submit-form');
+  const fileInput = document.getElementById('image-input');
+  const filePreview = document.getElementById('file-preview');
+  const charCount = document.getElementById('char-count');
+  const storyField = form.story_text;
+  const submitBtn = document.getElementById('submit-btn');
+  const result = document.getElementById('submit-result');
+
+  // hCaptcha lazy-loader. Only activates if user has set HCAPTCHA_SITE_KEY in supabase-config.js
+  let captchaWidgetId = null;
+  if (window.HCAPTCHA_SITE_KEY) {
+    document.getElementById('hcaptcha-wrap').style.display = 'block';
+    const s = document.createElement('script');
+    s.src = 'https://js.hcaptcha.com/1/api.js?render=explicit&onload=__hcLoaded';
+    s.async = true; s.defer = true;
+    window.__hcLoaded = function() {
+      captchaWidgetId = window.hcaptcha.render('hcaptcha-widget', {
+        sitekey: window.HCAPTCHA_SITE_KEY,
+        size: 'normal',
+      });
+    };
+    document.head.appendChild(s);
+  }
+
+  storyField.addEventListener('input', () => { charCount.textContent = storyField.value.length; });
+
+  // AUTH GATE: only signed-in users can access submit. Redirect to home + open modal if not.
+  (async () => {
+    const { data: { session } } = await SB.auth.getSession();
+    if (!session) {
+      try { sessionStorage.setItem('btc-auth-next', 'submit.html'); } catch (_) {}
+      window.location.href = 'login.html?next=submit.html';
+      return;
+    }
+    document.getElementById('signed-in-as').style.display = 'flex';
+    // Pre-fill contact with user's email if empty
+    const contactEl = document.querySelector('input[name="submitter_contact"]');
+    if (contactEl && !contactEl.value && session.user?.email) contactEl.value = session.user.email;
+  })();
+
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image too large. Maximum 5MB.');
+      fileInput.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      filePreview.innerHTML = '<img src="' + e.target.result + '" alt="Preview of selected photo" />';
+      filePreview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    // hCaptcha gate (only if configured)
+    if (window.HCAPTCHA_SITE_KEY && captchaWidgetId !== null) {
+      const tok = window.hcaptcha.getResponse(captchaWidgetId);
+      if (!tok) {
+        alert('Please complete the captcha first.');
+        return;
+      }
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.querySelector('.btn-text').style.display = 'none';
+    submitBtn.querySelector('.btn-loading').style.display = 'inline';
+    result.style.display = 'none';
+
+    try {
+      let imageUrl = null;
+      const file = fileInput.files[0];
+      if (file) {
+        // Optional NSFW pre-check via Sightengine (only if configured)
+        if (window.SIGHTENGINE_USER && window.SIGHTENGINE_SECRET) {
+          const fd = new FormData();
+          fd.append('media', file);
+          fd.append('models', 'nudity-2.0,offensive,gore');
+          fd.append('api_user', window.SIGHTENGINE_USER);
+          fd.append('api_secret', window.SIGHTENGINE_SECRET);
+          const resp = await fetch('https://api.sightengine.com/1.0/check.json', { method: 'POST', body: fd });
+          const j = await resp.json();
+          // Reject if any: nudity raw>0.6, offensive prob>0.6, gore prob>0.6
+          const nudity = (j.nudity?.raw || 0) > 0.6 || (j.nudity?.sexual_activity || 0) > 0.6;
+          const offensive = (j.offensive?.prob || 0) > 0.6;
+          const gore = (j.gore?.prob || 0) > 0.6;
+          if (nudity || offensive || gore) {
+            throw new Error('This image was flagged by our automated content check. Please choose a different image.');
+          }
+        }
+
+        const fileName = Date.now() + '-' + Math.random().toString(36).substring(2, 9) + '-' + file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const { data: upload, error: upErr } = await SB.storage
+          .from('submission-images')
+          .upload(fileName, file, { contentType: file.type, upsert: false });
+        if (upErr) throw upErr;
+        const { data: { publicUrl } } = SB.storage.from('submission-images').getPublicUrl(fileName);
+        imageUrl = publicUrl;
+      }
+
+      const fd = new FormData(form);
+      const sess = (await SB.auth.getSession()).data.session;
+      const payload = {
+        submitter_name: fd.get('submitter_name').trim(),
+        submitter_role: fd.get('submitter_role'),
+        submitter_contact: fd.get('submitter_contact')?.trim() || null,
+        submitter_user_id: sess?.user?.id || null,
+        program_slug: fd.get('program_slug'),
+        event_name: fd.get('event_name')?.trim() || null,
+        event_date: fd.get('event_date') || null,
+        story_text: fd.get('story_text').trim(),
+        image_url: imageUrl,
+      };
+
+      const { error } = await SB.from('submissions').insert(payload);
+      if (error) throw error;
+
+      // Show celebratory success state, hide form, fire toast
+      form.style.display = 'none';
+      result.className = 'submit-success';
+      result.innerHTML = '<div class="submit-success-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>'
+        + '<div class="kicker"><span class="mono accent">SUBMISSION RECEIVED</span></div>'
+        + '<h2 style="font-size: clamp(28px, 4vw, 44px); line-height: 1.05; margin: 8px 0 16px;">Thank you, <em style="color: var(--accent);">' + payload.submitter_name.split(' ')[0] + '.</em></h2>'
+        + '<p style="font-family: var(--font-serif); font-style: italic; font-size: 17px; line-height: 1.55; color: var(--ink-3); max-width: 52ch; margin: 0 0 24px;">Your story is in our review queue. We typically approve within 48 hours. Once published, it will appear on the <strong>' + payload.program_slug + '</strong> program page as recent work. We may reach out at <strong>' + (payload.submitter_contact || 'your contact') + '</strong> if we need clarification.</p>'
+        + '<div style="display: flex; gap: 12px; flex-wrap: wrap;"><a href="my.html" class="btn btn--ink">View my submissions →</a><a href="index.html#programs" class="btn btn--secondary">Back to programs</a></div>';
+      result.style.display = 'block';
+      window.btcToast && window.btcToast('Story submitted. We will email you when it goes live.', 'success');
+      window.scrollTo({ top: result.offsetTop - 100, behavior: 'smooth' });
+    } catch (err) {
+      console.error(err);
+      result.className = 'submit-result is-error';
+      result.innerHTML = '<strong>Submission failed.</strong><br>' + (err.message || 'Please try again, or message us on WhatsApp at +91 90009 35898.');
+      result.style.display = 'block';
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.querySelector('.btn-text').style.display = 'inline';
+      submitBtn.querySelector('.btn-loading').style.display = 'none';
+    }
+  });
+})();
+</script>

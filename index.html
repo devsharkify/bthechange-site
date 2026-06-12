@@ -1,0 +1,908 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#1E3A6F" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#142951" media="(prefers-color-scheme: dark)" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="B The Change" />
+<meta name="mobile-web-app-capable" content="yes" />
+<link rel="manifest" href="manifest.json" />
+<title>B The Change, Don't WAIT for change. Be the change.</title>
+<meta name="description" content="A Hyderabad-based welfare society. Since 2006, 11 programs across India: education, health, women's empowerment, environment, animal welfare, legal aid. Reg 1538/2015 · 80G certified." />
+
+<!-- OpenGraph (Facebook, LinkedIn, WhatsApp link previews) -->
+<meta property="og:site_name" content="B The Change Welfare Society" />
+<meta property="og:title" content="B The Change, Don't WAIT for change. Be the change." />
+<meta property="og:description" content="A Hyderabad-based welfare society. Since 2006, 11 programs across India: education, health, women's empowerment, environment, animal welfare, legal aid. Reg 1538/2015 · 80G certified." />
+<meta property="og:image" content="https://bthechange.in/assets/bthechange-logo.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="en_IN" />
+
+<!-- Twitter card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="B The Change, Don't WAIT for change. Be the change." />
+<meta name="twitter:description" content="A Hyderabad-based welfare society. Since 2006, 11 programs across India: education, health, women's empowerment, environment, animal welfare, legal aid. Reg 1538/2015 · 80G certified." />
+<meta name="twitter:image" content="https://bthechange.in/assets/bthechange-logo.png" />
+
+<!-- Schema.org NGO markup -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "NGO",
+  "name": "B The Change Welfare Society",
+  "alternateName": "B The Change",
+  "url": "https://bthechange.in",
+  "logo": "https://bthechange.in/assets/bthechange-logo.png",
+  "foundingDate": "2006",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Rd Number 2, Visaka Nagar, Almasguda",
+    "addressLocality": "Hyderabad",
+    "addressRegion": "Telangana",
+    "postalCode": "500112",
+    "addressCountry": "IN"
+  },
+  "email": "support@bthechange.in",
+  "telephone": "+919000935898",
+  "sameAs": []
+}
+</script>
+
+<link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png" />
+<link rel="icon" type="image/png" sizes="512x512" href="assets/icon-512.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/style.css" />
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script defer src="assets/supabase-config.js"></script>
+<script defer src="assets/admin-bell.js"></script>
+
+<!-- Plausible analytics (privacy-friendly, GDPR-compliant). Replace data-domain after deploy. -->
+<script defer data-domain="bthechange.in" src="https://plausible.io/js/script.js"></script>
+
+<!-- Sentry browser SDK (uncomment + replace DSN after creating project) -->
+<!-- <script src="https://browser.sentry-cdn.com/7.105.0/bundle.tracing.min.js" crossorigin="anonymous"></script>
+<script>if (window.Sentry) Sentry.init({ dsn: 'YOUR_SENTRY_DSN', tracesSampleRate: 0.2 });</script> -->
+</head>
+<body>
+<a href="#main" class="skip">Skip to content</a>
+<div id="btc-toast-stack" class="btc-toast-stack" aria-live="polite" aria-atomic="true"></div>
+
+<div class="ann">
+  <div class="ann-inner">
+    <span><span class="ann-dot">●</span>&nbsp; SINCE 2006</span>
+    <span>·</span>
+    <span>REG NO 1538/2015</span>
+    <span>·</span>
+    <span>80G · 12A · CSR-1</span>
+    <span>·</span>
+    <span>NITI AAYOG TS/2023/0380583</span>
+  </div>
+</div>
+
+<header class="hdr" id="hdr">
+  <div class="hdr-inner">
+    <a class="brand" href="index.html" aria-label="B The Change Welfare Society">
+      <img src="assets/bthechange-logo.png" alt="B The Change Welfare Society" class="brand-logo" />
+    </a>
+    <nav class="nav" id="nav">
+      <a href="about.html">About</a>
+      <a href="team.html">Team</a>
+      <a href="index.html#programs">Programs</a>
+      <a href="awards.html" style="color: var(--accent);">Awards</a>
+      <a href="blog.html">Blog</a>
+      <a href="login.html" class="nav-signin-mobile">Sign in</a>
+      <a href="submit.html" class="nav-mobile-only hdr-user-mobile-link" style="display:none;">Share story</a>
+      <a href="my.html" class="nav-mobile-only hdr-user-mobile-link" style="display:none;">My submissions</a>
+      <a href="admin.html" class="nav-mobile-only hdr-admin-mobile-link" style="display:none;">Admin <span id="hdr-admin-mobile-count" style="color:var(--accent);"></span></a>
+      <a href="#" class="nav-mobile-only hdr-user-mobile-link" id="hdr-signout-mobile" style="display:none;">Sign out</a>
+    </nav>
+    <div class="hdr-cta">
+      <div class="hdr-user-menu" id="hdr-user-menu" style="display:none;">
+        <button class="hdr-user-btn" id="hdr-user-btn" aria-label="User menu" aria-expanded="false">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M4 21c0-4 4-7 8-7s8 3 8 7"/>
+          </svg>
+          <span class="hdr-user-pip" id="hdr-user-pip" style="display:none;"></span>
+        </button>
+        <div class="hdr-user-dropdown" id="hdr-user-dropdown" role="menu">
+          <a href="submit.html" role="menuitem">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg>
+            Share story
+          </a>
+          <a href="my.html" role="menuitem">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+            My submissions
+          </a>
+          <a href="admin.html" role="menuitem" id="hdr-dropdown-admin" style="display:none;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            Admin <span class="hdr-dropdown-count" id="hdr-dropdown-count" style="display:none;">0</span>
+          </a>
+          <div class="hdr-user-divider"></div>
+          <button type="button" class="hdr-user-signout" id="hdr-signout">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
+            Sign out
+          </button>
+        </div>
+      </div>
+      <a href="login.html" class="hdr-signin" id="hdr-signin-link">Sign in</a>
+      <a href="https://wa.me/919000935898?text=Hi%2C%20I%20want%20to%20partner%20with%20B%20The%20Change%20Welfare%20Society." target="_blank" rel="noopener" class="btn btn--ink">Partner with us</a>
+      <button class="menu-btn btn" aria-label="Toggle menu" id="menu-btn"><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="hero hero--with-photo" style="background-image: url('assets/hero-kids-coding.jpg');">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div class="hero-text" data-reveal>
+          <div class="hero-eyebrow">A LEGACY SINCE 2006 · REG 1538/2015</div>
+          <h1 class="hero-h1">Don't <span class="strike">WAIT</span><br />for change.<br /><span class="be">Be</span> the change.</h1>
+          <p class="hero-lede">Two decades. Eleven programs. Two hundred thousand lives quietly, stubbornly turned. We don't run on slogans. We run on showing up.</p>
+          <div class="hero-cta">
+            <a href="awards.html" class="btn btn--accent btn--lg">B The Change Awards <span class="arrow">→</span></a>
+            <a href="#programs" class="btn btn--secondary btn--lg">See our programs</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="hero-stats-strip">
+    <div class="wrap">
+      <div class="hero-stats" data-reveal>
+        <div><div class="hero-stat-num"><span data-count="20">20</span><span>YR</span></div><div class="hero-stat-lbl">UNBROKEN WORK</div></div>
+        <div><div class="hero-stat-num"><span data-count="200000">200,000</span>+</div><div class="hero-stat-lbl">LIVES TOUCHED</div></div>
+        <div><div class="hero-stat-num"><span data-count="11">11</span></div><div class="hero-stat-lbl">PROGRAMS</div></div>
+        <div><div class="hero-stat-num">2<span class="serif-it" style="color:var(--accent);">/2</span></div><div class="hero-stat-lbl">COUNTRIES</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section muted" id="programs">
+    <div class="wrap">
+      <div class="section-head" data-reveal>
+        <div class="kicker"><span class="mono accent">WHAT WE DO · 11 PROGRAMS</span></div>
+        <h2>Eleven fronts. <em>One mission.</em></h2>
+        <p style="font-family:var(--font-serif); font-style:italic; font-size:18px; color:var(--ink-3); max-width:42ch; margin:0;">
+          Each program is run end-to-end by a local team.<br />Tap any program to see its story, its work, and how to support it directly.
+        </p>
+      </div>
+
+      <div class="programs-grid programs-grid--asym">
+        
+        <a href="programs/coding-on-wheels.html" class="program-card" data-reveal style="--d: 0ms; --card-color: #1E3A6F; --card-bg: linear-gradient(135deg, #DCE8F5 0%, #A4BEDC 100%); --card-tint: #1E3A6F1A;">
+          <div class="pc-num">
+            <span><strong>01</strong> · CODING</span>
+            <span class="pc-num-arr">→</span>
+          </div>
+          <div class="pc-icon pc-icon--image"><img src="assets/logo-coding-on-wheels.jpg" alt="Coding on Wheels logo" /></div>
+          <h3>Coding on Wheels</h3>
+          <p>Bridging India's digital divide through code, AI &amp; robotics.</p>
+        </a>
+        <a href="programs/changemakers.html" class="program-card" data-reveal style="--d: 50ms; --card-color: #1E3A6F; --card-bg: linear-gradient(135deg, #E5EDF8 0%, #A8C0DC 100%); --card-tint: #1E3A6F1A;">
+          <div class="pc-num">
+            <span><strong>02</strong> · CHANGEMAKERS</span>
+            <span class="pc-num-arr">→</span>
+          </div>
+          <div class="pc-icon pc-icon--image"><img src="assets/logo-changemakers.jpg" alt="Changemakers logo" /></div>
+          <h3>Changemakers</h3>
+          <p>Be the spark. Lead the change.</p>
+        </a>
+        <a href="programs/organ-donation-on-wheels.html" class="program-card" data-reveal style="--d: 100ms; --card-color: #1E3A6F; --card-bg: linear-gradient(135deg, #FFE0E0 0%, #FFB0B0 100%); --card-tint: #1E3A6F1A;">
+          <div class="pc-num">
+            <span><strong>03</strong> · ORGAN</span>
+            <span class="pc-num-arr">→</span>
+          </div>
+          <div class="pc-icon pc-icon--image"><img src="assets/od-logo.jpg" alt="Organ Donation Campaign on Wheels logo" /></div>
+          <h3>Organ Donation Campaign on Wheels</h3>
+          <p>Wheels that carry the message of life.</p>
+        </a>
+        <a href="programs/eko-warriors.html" class="program-card" data-reveal style="--d: 150ms; --card-color: #2D7A3E; --card-bg: linear-gradient(135deg, #E0F4E5 0%, #A8D5B5 100%); --card-tint: #2D7A3E1A;">
+          <div class="pc-num">
+            <span><strong>04</strong> · EKO</span>
+            <span class="pc-num-arr">→</span>
+          </div>
+          <div class="pc-icon pc-icon--image"><img src="assets/logo-eko-warriors.jpg" alt="EKO Warriors logo" /></div>
+          <h3>EKO Warriors</h3>
+          <p>Defenders of nature. Protectors of place.</p>
+        </a>
+        <a href="programs/pawtection-force.html" class="program-card" data-reveal style="--d: 200ms; --card-color: #5A5A55; --card-bg: linear-gradient(135deg, #F0EBE0 0%, #C8B898 100%); --card-tint: #5A5A551A;">
+          <div class="pc-num">
+            <span><strong>05</strong> · PAWTECTION</span>
+            <span class="pc-num-arr">→</span>
+          </div>
+          <div class="pc-icon pc-icon--image"><img src="assets/logo-pawtection.jpg" alt="PAWtection Force logo" /></div>
+          <h3>PAWtection Force</h3>
+          <p>Guardians of the speechless.</p>
+        </a>
+        <a href="programs/we-women-empowerment.html" class="program-card" data-reveal style="--d: 250ms; --card-color: #C42882; --card-bg: linear-gradient(135deg, #FCE4F0 0%, #F5A8C8 100%); --card-tint: #C428821A;">
+          <div class="pc-num">
+            <span><strong>06</strong> · WE:</span>
+            <span class="pc-num-arr">→</span>
+          </div>
+          <div class="pc-icon pc-icon--image"><img src="assets/logo-we.jpg" alt="WE: Women Empowerment logo" /></div>
+          <h3>WE: Women Empowerment</h3>
+          <p>Economic dignity. Health awareness. Real autonomy.</p>
+        </a>
+        <a href="programs/global-human-rights-front.html" class="program-card" data-reveal style="--d: 300ms; --card-color: #2563A8; --card-bg: linear-gradient(135deg, #E0EBF8 0%, #A8C4E0 100%); --card-tint: #2563A81A;">
+          <div class="pc-num">
+            <span><strong>07</strong> · GLOBAL</span>
+            <span class="pc-num-arr">→</span>
+          </div>
+          <div class="pc-icon pc-icon--image"><img src="assets/logo-ghr.jpg" alt="Global Human Rights Front logo" /></div>
+          <h3>Global Human Rights Front</h3>
+          <p>Defending rights. Defying silence.</p>
+        </a>
+        <a href="programs/cross-connect-legal-aid.html" class="program-card" data-reveal style="--d: 350ms; --card-color: #2A2A2A; --card-bg: linear-gradient(135deg, #ECEAE3 0%, #B8B4AE 100%); --card-tint: #2A2A2A1A;">
+          <div class="pc-num">
+            <span><strong>08</strong> · CROSS</span>
+            <span class="pc-num-arr">→</span>
+          </div>
+          <div class="pc-icon pc-icon--image"><img src="assets/logo-cross-connect.jpg" alt="Cross Connect Legal Aid logo" /></div>
+          <h3>Cross Connect Legal Aid</h3>
+          <p>From immigration to reconciliation, we stand with you.</p>
+        </a>
+        <a href="programs/dreamcatchers.html" class="program-card" data-reveal style="--d: 400ms; --card-color: #1E3A6F; --card-bg: linear-gradient(135deg, #FFE8E0 0%, #FFB8A0 100%); --card-tint: #1E3A6F1A;">
+          <div class="pc-num">
+            <span><strong>09</strong> · DREAMCATCHERS</span>
+            <span class="pc-num-arr">→</span>
+          </div>
+          <div class="pc-icon pc-icon--image"><img src="assets/logo-dreamcatchers.jpg" alt="DreamCatchers logo" /></div>
+          <h3>DreamCatchers</h3>
+          <p>From dreams to reality.</p>
+        </a>
+        <a href="programs/launchpad.html" class="program-card" data-reveal style="--d: 450ms; --card-color: #1E3A6F; --card-bg: linear-gradient(135deg, #E0EAF7 0%, #A0BCD8 100%); --card-tint: #1E3A6F1A;">
+          <div class="pc-num">
+            <span><strong>10</strong> · LAUNCHPAD</span>
+            <span class="pc-num-arr">→</span>
+          </div>
+          <div class="pc-icon pc-icon--image"><img src="assets/bthechange-logo.png" alt="Launchpad logo" /></div>
+          <h3>Launchpad</h3>
+          <p>First job. First salary. First step.</p>
+        </a>
+        <a href="programs/lawgic.html" class="program-card" data-reveal style="--d: 500ms; --card-color: #1E3A6F; --card-bg: linear-gradient(135deg, #F0EDE5 0%, #D9D2BE 100%); --card-tint: #1E3A6F1A;">
+          <div class="pc-num">
+            <span><strong>11</strong> · L.A.W.G.I.C.</span>
+            <span class="pc-num-arr">→</span>
+          </div>
+          <div class="pc-icon pc-icon--image"><img src="assets/bthechange-logo.png" alt="L.A.W.G.I.C. logo" /></div>
+          <h3>L.A.W.G.I.C.</h3>
+          <p>Free legal aid for those the system forgets.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- FOUNDER RESOLVE CAROUSEL -->
+  <section class="section" id="foundation">
+    <div class="wrap">
+      <div class="leader-head" data-reveal>
+        <div class="kicker"><span class="mono accent">EST 2006 · A FOUNDER'S RESOLVE</span></div>
+        <div class="leader-head-row">
+          <h2 style="margin: 0;">Two decades of <em>quiet</em> change.</h2>
+          <div class="leader-controls" aria-label="Carousel navigation">
+            <button class="leader-btn" id="leader-prev" aria-label="Previous leader" disabled>←</button>
+            <span class="leader-count"><span id="leader-current">1</span> / 2</span>
+            <button class="leader-btn" id="leader-next" aria-label="Next leader">→</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="leader-carousel">
+        <div class="leader-track" id="leader-track">
+          
+          <article class="leader-slide" data-slide="0" aria-label="Sri Ram Kalyan Challa, Founder & President">
+            <div class="foundation-grid">
+              <div class="foundation-text">
+                <div class="foundation-text-body">
+                  <div class="kicker"><span class="mono accent">FOUNDER'S NOTE · RAM CHALLA</span></div>
+                  <h2>It started with <em>one</em> question.</h2>
+                  <p><strong>Ram Challa</strong>, founder of B The Change Welfare Society, has spent two decades doing one thing extraordinarily well: showing up. A practising <strong>lawyer and UK Solicitor</strong>, he has filed PILs that protected forests, built classrooms that taught a generation Python, and stood with families across India and the UK. <a href="about.html" class="inline-link">Know work →</a></p>
+                </div>
+
+                <div class="leader-foot">
+                  <div class="leader-dots" role="tablist" aria-label="Leader slides">
+                    <button class="leader-dot is-active" data-go="0" aria-label="Show Ram Challa"></button><button class="leader-dot" data-go="1" aria-label="Show Rohan"></button>
+                  </div>
+                </div>
+              </div>
+              <figure class="photo-slot photo-slot--image" style="background-image: url('assets/founder.jpg');">
+                <span class="photo-mark">B THE CHANGE WELFARE SOCIETY</span>
+                <p class="photo-cap-name">Founder & President</p>
+              </figure>
+            </div>
+          </article>
+          <article class="leader-slide" data-slide="1" aria-label="Rohan Rajkulkarni, Working President">
+            <div class="foundation-grid">
+              <div class="foundation-text">
+                <div class="foundation-text-body">
+                  <div class="kicker"><span class="mono accent">WORKING PRESIDENT</span></div>
+                  <h2>Every program runs through <em>young people</em>.</h2>
+                  <p>Rohan leads the Youth &amp; Education portfolio across all nine programs. An <strong>MBA from IIM Kozhikode</strong> and a <strong>law graduate from NALSAR Hyderabad</strong>, he has spent the last decade in public service, mostly inside classrooms, panchayat halls, and the back rooms of state-level education reform. <a href="about.html" class="inline-link">Know work →</a></p>
+                </div>
+
+                <div class="leader-foot">
+                  <div class="leader-dots" role="tablist" aria-label="Leader slides">
+                    <button class="leader-dot is-active" data-go="0" aria-label="Show Ram Challa"></button><button class="leader-dot" data-go="1" aria-label="Show Rohan"></button>
+                  </div>
+                </div>
+              </div>
+              <figure class="photo-slot photo-slot--image" style="background-image: url('assets/rohan.jpg');">
+                <span class="photo-mark">B THE CHANGE WELFARE SOCIETY</span>
+                <p class="photo-cap-name">Working President</p>
+              </figure>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section dark" id="impact">
+    <div class="wrap">
+      <div class="impact-head" data-reveal>
+        <div class="kicker"><span class="mono accent">IMPACT · LIFETIME</span></div>
+        <h2>Numbers that <em>mean</em> something.</h2>
+      </div>
+      <div class="impact-grid">
+        <div class="impact-cell" data-reveal>
+          <div class="impact-num"><span data-count="200000">200,000</span><span class="unit">+</span></div>
+          <div class="impact-lbl">LIVES TOUCHED</div>
+          <div class="impact-cap">Children, mothers, elders, families served since 2006.</div>
+        </div>
+        <div class="impact-cell" data-reveal style="--d: 100ms">
+          <div class="impact-num"><span data-count="1000">1,000</span><span class="unit">+</span></div>
+          <div class="impact-lbl">SCHOOLS PARTNERED</div>
+          <div class="impact-cap">Government schools and community programs across rural India.</div>
+        </div>
+        <div class="impact-cell" data-reveal style="--d: 200ms">
+          <div class="impact-num"><span data-count="11">11</span></div>
+          <div class="impact-lbl">ACTIVE PROGRAMS</div>
+          <div class="impact-cap">From digital education to legal aid. End-to-end, locally run.</div>
+        </div>
+        <div class="impact-cell" data-reveal style="--d: 300ms">
+          <div class="impact-num"><span data-count="9">9</span><span class="unit">YR</span></div>
+          <div class="impact-lbl">EKO WARRIORS</div>
+          <div class="impact-cap">Sustained environmental advocacy. PILs filed. Forests still standing.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="voices">
+    <div class="wrap">
+      <div class="section-head" data-reveal>
+        <div class="kicker"><span class="mono accent">VOICES · ON THE GROUND</span></div>
+        <h2>Stories <em>they</em> wrote.</h2>
+      </div>
+      <div class="programs-grid programs-grid--3">
+        
+        <article class="program-card program-card--withfoot" data-reveal style="--card-color: #1E3A6F; --card-bg: linear-gradient(135deg, #DCE8F5 0%, #A4BEDC 100%); --card-tint: #1E3A6F1A;">
+          <div class="pc-num"><strong>CODING</strong></div>
+          <p style="font-family:var(--font-serif); font-style: italic; font-size: 17px; color: var(--ink); margin: 18px 0; line-height: 1.5;">"I am the first person in my village to write a Python program. My amma still doesn't quite understand what I do, but she knows I'll never be a daily-wage labourer."</p>
+          <div class="program-card-foot" style="border-top: 1px solid var(--line);">
+            <div style="font-family: var(--font-mono); font-weight: 700; font-size: 9.5px; letter-spacing: 1.6px; color: var(--mute);">ARJUN · CLASS 9 · ADILABAD</div>
+            <a href="programs/coding-on-wheels.html" class="program-card-go">Read more →</a>
+          </div>
+        </article>
+        <article class="program-card program-card--withfoot" data-reveal style="--card-color: #1E3A6F; --card-bg: linear-gradient(135deg, #E5EDF8 0%, #A8C0DC 100%); --card-tint: #1E3A6F1A;">
+          <div class="pc-num"><strong>CHANGEMAKERS</strong></div>
+          <p style="font-family:var(--font-serif); font-style: italic; font-size: 17px; color: var(--ink); margin: 18px 0; line-height: 1.5;">"I was 67 when I started organising my colony's water-supply complaint. Now I run the WhatsApp group for three wards."</p>
+          <div class="program-card-foot" style="border-top: 1px solid var(--line);">
+            <div style="font-family: var(--font-mono); font-weight: 700; font-size: 9.5px; letter-spacing: 1.6px; color: var(--mute);">KAMALA · 71 · WARD 13, SECUNDERABAD</div>
+            <a href="programs/changemakers.html" class="program-card-go">Read more →</a>
+          </div>
+        </article>
+        <article class="program-card program-card--withfoot" data-reveal style="--card-color: #1E3A6F; --card-bg: linear-gradient(135deg, #FFE0E0 0%, #FFB0B0 100%); --card-tint: #1E3A6F1A;">
+          <div class="pc-num"><strong>ORGAN</strong></div>
+          <p style="font-family:var(--font-serif); font-style: italic; font-size: 17px; color: var(--ink); margin: 18px 0; line-height: 1.5;">"I signed the donor card after their session at my college. Two years later, my father's eyes saved someone else's vision. The circle closed."</p>
+          <div class="program-card-foot" style="border-top: 1px solid var(--line);">
+            <div style="font-family: var(--font-mono); font-weight: 700; font-size: 9.5px; letter-spacing: 1.6px; color: var(--mute);">FATHIMA · 24 · MEDICAL STUDENT</div>
+            <a href="programs/organ-donation-on-wheels.html" class="program-card-go">Read more →</a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section muted" id="involve">
+    <div class="wrap">
+      <div class="section-head" data-reveal>
+        <div class="kicker"><span class="mono accent">GET INVOLVED</span></div>
+        <h2>Three ways to <em>show up.</em></h2>
+      </div>
+      <div class="programs-grid programs-grid--3 programs-grid--involve">
+        <a href="https://wa.me/919000935898?text=Hi%2C%20I%20want%20to%20partner%20with%20B%20The%20Change%20Welfare%20Society%2C%20interested%20in%20CSR%20%2F%20sponsorship." target="_blank" rel="noopener" class="program-card program-card--withfoot" style="--card-color: var(--accent); --card-bg: var(--accent-soft); --card-tint: var(--accent-soft); background: var(--accent-soft); color: var(--ink); border-color: rgba(30, 58, 111, 0.18);">
+          <div class="pc-num" style="color: var(--ink-3);"><strong style="color: var(--accent);">01</strong> · PARTNER</div>
+          <h3 style="color: var(--ink);">Power a <em style="font-family: var(--font-serif); font-style: italic; color: var(--accent);">whole</em> program for a year.</h3>
+          <p style="color: var(--ink-3);">Four partnership tiers from ₹1,00,000 to ₹5,00,000+. CSR-1 eligible. 80G receipts. Quarterly impact reports. Site visits.</p>
+          <div class="program-card-foot" style="border-top-color: rgba(30, 58, 111, 0.18);">
+            <div class="program-card-tag" style="background: rgba(30, 58, 111, 0.10); color: var(--accent);">CSR · 80G · 12A</div>
+            <div class="program-card-go" style="color: var(--accent);">Talk on WhatsApp →</div>
+          </div>
+        </a>
+        <a href="https://wa.me/919000935898?text=Hi%2C%20I%20want%20to%20volunteer%20with%20B%20The%20Change.%20My%20skill%20%2F%20availability%20is%3A%20" target="_blank" rel="noopener" class="program-card program-card--withfoot">
+          <div class="pc-num"><strong style="color: var(--accent);">02</strong> · VOLUNTEER</div>
+          <h3>Bring a skill we <em style="font-family: var(--font-serif); font-style: italic; color: var(--accent);">actually</em> need.</h3>
+          <p>We don't run "feel-good" volunteering. We need teachers, accountants, doctors, advocates willing to commit 4 weekends a year.</p>
+          <div class="program-card-foot">
+            <div class="program-card-tag">HYDERABAD · REMOTE</div>
+            <div class="program-card-go">Apply →</div>
+          </div>
+        </a>
+        <a href="https://wa.me/919000935898?text=Hi%2C%20I%20would%20like%20to%20walk%20a%20B%20The%20Change%20program%20end-to-end.%20Background%3A%20" target="_blank" rel="noopener" class="program-card program-card--withfoot">
+          <div class="pc-num"><strong style="color: var(--accent);">03</strong> · BUILD WITH US</div>
+          <h3>Walk a program <em style="font-family: var(--font-serif); font-style: italic; color: var(--accent);">end-to-end</em> with us.</h3>
+          <p>For impact-led founders, lawyers, journalists, and grassroots leaders. Reach out on WhatsApp, we'll set up a call within 48 hours.</p>
+          <div class="program-card-foot">
+            <div class="program-card-tag">+91 90009 35898</div>
+            <div class="program-card-go">Reach out →</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="final-cta" id="partner">
+    <div class="wrap">
+      <div class="final-grid">
+        <div data-reveal>
+          <div class="mono">PARTNER WITH US · CSR · 80G · 12A · CSR-1</div>
+          <h2>Power <em>what</em> truly matters.</h2>
+        </div>
+        <div data-reveal style="--d: 200ms">
+          <div class="final-amounts">
+            <a href="https://wa.me/919000935898?text=Hi%2C%20I%20want%20to%20partner%20with%20B%20The%20Change%20as%20a%20Community%20Partner%20(%E2%82%B91%2C00%2C000)." target="_blank" rel="noopener" class="amt-btn"><span class="a">₹1,00,000</span><span class="b">COMMUNITY PARTNER</span></a>
+            <a href="https://wa.me/919000935898?text=Hi%2C%20I%20want%20to%20partner%20with%20B%20The%20Change%20as%20an%20Impact%20Partner%20(%E2%82%B92%2C00%2C000)." target="_blank" rel="noopener" class="amt-btn"><span class="a">₹2,00,000</span><span class="b">IMPACT PARTNER</span></a>
+            <a href="https://wa.me/919000935898?text=Hi%2C%20I%20want%20to%20partner%20with%20B%20The%20Change%20as%20a%20Premier%20Partner%20(%E2%82%B93%2C50%2C000)." target="_blank" rel="noopener" class="amt-btn"><span class="a">₹3,50,000</span><span class="b">PREMIER PARTNER</span></a>
+            <a href="https://wa.me/919000935898?text=Hi%2C%20I%20want%20to%20partner%20with%20B%20The%20Change%20as%20a%20Legacy%20Patron%20(%E2%82%B95%2C00%2C000)." target="_blank" rel="noopener" class="amt-btn"><span class="a">₹5,00,000</span><span class="b">LEGACY PATRON</span></a>
+            <a href="https://wa.me/919000935898?text=Hi%2C%20I%20want%20to%20partner%20with%20B%20The%20Change%20Welfare%20Society." target="_blank" rel="noopener" class="amt-btn amt-btn--primary">Become a partner <span class="arrow">→</span></a>
+          </div>
+          <div class="final-foot">AXIS BANK · DIRECT TRANSFER · QUARTERLY IMPACT REPORT</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr-top">
+      <div class="ftr-brand">
+        <a class="brand" href="index.html" aria-label="B The Change Welfare Society">
+          <img src="assets/bthechange-logo.png" alt="B The Change Welfare Society" class="brand-logo brand-logo--lg" />
+        </a>
+        <p class="ftr-tag">"Real change is the slowest thing in the world. You sit with a family for ten years before you see it."</p>
+      </div>
+
+      <div class="ftr-col">
+        <h5>Reach us</h5>
+        <address class="ftr-addr">
+          <a href="https://share.google/wMmcZ4BGYnMA3Ulfx" target="_blank" rel="noopener" title="Open in Google Maps">Rd Number 2, Visaka Nagar, Almasguda, Hyderabad, Telangana 500112 <span style="opacity:.6;">↗</span></a>
+          <a href="mailto:support@bthechange.in">support@bthechange.in</a>
+          <a href="https://wa.me/919000935898?text=Hi%2C%20I%20want%20to%20reach%20B%20The%20Change%20Welfare%20Society." target="_blank" rel="noopener" class="ftr-wa">WhatsApp · +91 90009 35898</a>
+        </address>
+      </div>
+
+      <div class="ftr-col">
+        <h5>Get involved</h5>
+        <ul>
+          <li><a href="awards.html" style="color: var(--accent);">ChangeMaker Awards 2026</a></li>
+          <li><a href="https://wa.me/919000935898?text=Hi%2C%20I%20want%20to%20partner%20with%20B%20The%20Change%20Welfare%20Society." target="_blank" rel="noopener">Partner with us</a></li>
+          <li><a href="index.html#involve">Volunteer</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="team.html">Team</a></li>
+          <li><a href="index.html#programs">All 11 programs</a></li>
+          <li><a href="about.html#board">Board of trustees</a></li>
+          <li><a href="about.html#transparency">Annual reports</a></li>
+          <li><a href="press.html">Press kit</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ftr-bottom">
+      <div class="ftr-creds">
+        <span>REG <span>1538/2015</span></span>
+        <span class="ftr-dot" aria-hidden="true">·</span>
+        <span>NITI AAYOG <span>TS/2023/0380583</span></span>
+        <span class="ftr-dot" aria-hidden="true">·</span>
+        <span>80G &middot; 12A &middot; CSR-1</span>
+        <span class="ftr-dot" aria-hidden="true">·</span>
+        <span>© 2006-2026 B THE CHANGE</span>
+        <span class="ftr-dot" aria-hidden="true">·</span>
+        <a href="privacy.html" style="color:inherit;text-decoration:none;font-size:inherit;">Privacy Policy</a>
+      </div>
+      <div class="ftr-social" aria-label="Social media">
+        <button id="btc-install-btn" hidden type="button" class="ftr-install" aria-label="Install B The Change app on your phone">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+          <span>Install app</span>
+        </button>
+        <a href="#" aria-label="Instagram"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.6" fill="currentColor"/></svg></a>
+        <a href="#" aria-label="LinkedIn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 11v6M8 8v.01M12 17v-4a2 2 0 0 1 4 0v4M12 11v6"/></svg></a>
+        <a href="#" aria-label="YouTube"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M10 9l5 3-5 3z" fill="currentColor"/></svg></a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<nav class="site-bnav" aria-label="Main navigation">
+  <a class="site-bnav-item" href="index.html" data-bnav="home">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span class="site-bnav-label">Home</span>
+  </a>
+  <a class="site-bnav-item" href="index.html#programs" data-bnav="programs">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    <span class="site-bnav-label">Programs</span>
+  </a>
+  <a class="site-bnav-item" href="blog.html" data-bnav="blog">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    <span class="site-bnav-label">Blog</span>
+  </a>
+  <a class="site-bnav-item" href="index.html#involve" data-bnav="involve">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    <span class="site-bnav-label">Volunteer</span>
+  </a>
+  <a class="site-bnav-item" href="login.html" data-bnav="account" id="site-bnav-account">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span class="site-bnav-label">Account</span>
+  </a>
+</nav>
+<script>
+(function(){
+  var p = window.location.pathname;
+  var map = { home: ['/index.html','/'], programs: ['/programs/'], blog: ['/blog.html','/blog-post.html','/blog-write.html'], account: ['/login.html','/my.html','/submit.html'] };
+  Object.keys(map).forEach(function(key){
+    var hits = map[key];
+    var match = hits.some(function(h){ return p === h || p.endsWith(h) || p.includes(h); });
+    if (match) { var el = document.querySelector('.site-bnav-item[data-bnav="' + key + '"]'); if (el) el.classList.add('is-active'); }
+  });
+})();
+</script>
+
+<div class="auth-modal" id="auth-modal" aria-hidden="true" role="dialog">
+  <div class="auth-card">
+    <button class="auth-close" id="auth-close" aria-label="Close sign in">×</button>
+    <div class="auth-steps">
+      <section class="auth-step is-active" data-step="1">
+        <div class="auth-brandbar">
+          <img src="assets/bthechange-logo.png" alt="B The Change Welfare Society" class="brand-logo brand-logo--lg" />
+          <span class="auth-reg-tag">REG NO 1538/2015</span>
+        </div>
+        <div class="auth-kicker"><span>SIGN IN · STEP 01 OF 02</span></div>
+        <h2 class="auth-h1">Don't <span class="strike">WAIT</span> for change.<br /><span class="be">Be</span> the change.</h2>
+        <p class="auth-lede">Sign in to share stories, volunteer, or manage submissions. We'll send a 6-digit code to verify it's you.</p>
+        <div class="auth-decor"><span></span></div>
+        <div class="auth-tabs">
+          <button class="auth-tab is-active" data-tab="email" type="button">Email</button>
+          <button class="auth-tab" data-tab="phone" type="button">Phone</button>
+        </div>
+        <label class="auth-label" for="auth-phone-input">EMAIL ADDRESS</label>
+        <div class="auth-phone-row is-email" id="auth-phone-row">
+          <div class="auth-cc">
+            <button class="auth-cc-btn" id="auth-cc-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+              <span class="auth-cc-flag">🇮🇳</span>
+              <span class="auth-cc-code" id="auth-cc-code">+91</span>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="auth-cc-list" id="auth-cc-list" role="listbox">
+              <button type="button" data-cc="+91" data-flag="🇮🇳" data-name="India">🇮🇳 India <span>+91</span></button>
+              <button type="button" data-cc="+1"  data-flag="🇺🇸" data-name="USA">🇺🇸 United States <span>+1</span></button>
+              <button type="button" data-cc="+44" data-flag="🇬🇧" data-name="UK">🇬🇧 United Kingdom <span>+44</span></button>
+              <button type="button" data-cc="+971" data-flag="🇦🇪" data-name="UAE">🇦🇪 UAE <span>+971</span></button>
+              <button type="button" data-cc="+61" data-flag="🇦🇺" data-name="Australia">🇦🇺 Australia <span>+61</span></button>
+              <button type="button" data-cc="+1" data-flag="🇨🇦" data-name="Canada">🇨🇦 Canada <span>+1</span></button>
+              <button type="button" data-cc="+65" data-flag="🇸🇬" data-name="Singapore">🇸🇬 Singapore <span>+65</span></button>
+              <button type="button" data-cc="+60" data-flag="🇲🇾" data-name="Malaysia">🇲🇾 Malaysia <span>+60</span></button>
+              <button type="button" data-cc="+966" data-flag="🇸🇦" data-name="Saudi Arabia">🇸🇦 Saudi Arabia <span>+966</span></button>
+              <button type="button" data-cc="+974" data-flag="🇶🇦" data-name="Qatar">🇶🇦 Qatar <span>+974</span></button>
+              <button type="button" data-cc="+49" data-flag="🇩🇪" data-name="Germany">🇩🇪 Germany <span>+49</span></button>
+              <button type="button" data-cc="+33" data-flag="🇫🇷" data-name="France">🇫🇷 France <span>+33</span></button>
+              <button type="button" data-cc="+81" data-flag="🇯🇵" data-name="Japan">🇯🇵 Japan <span>+81</span></button>
+              <button type="button" data-cc="+86" data-flag="🇨🇳" data-name="China">🇨🇳 China <span>+86</span></button>
+            </div>
+          </div>
+          <input type="email" id="auth-phone-input" class="auth-input" placeholder="you@example.com" autocomplete="email" />
+        </div>
+        <div id="auth-phone-warn" class="auth-warn" style="display:none;">Phone sign-in launching soon. Please use Email for now.</div>
+        <div id="auth-error" class="auth-error" style="display:none;"></div>
+        <p class="auth-helper">We'll never share your contact. Used only to verify it's you.</p>
+        <button class="btn btn--accent btn--block btn--lg" id="auth-phone-submit" type="button">Continue <span class="arrow">→</span></button>
+      </section>
+      <section class="auth-step" data-step="2">
+        <div class="auth-topbar">
+          <button class="auth-back" data-back-to="1" aria-label="Back">←</button>
+          <div class="auth-step-mono">STEP 02 OF 02</div>
+          <div style="flex:1"></div>
+        </div>
+        <div class="auth-kicker"><span>ENTER 6-DIGIT CODE</span></div>
+        <h2 class="auth-h1">Check your <em>inbox.</em></h2>
+        <p class="auth-lede">We sent a code to <span id="auth-otp-phone">...</span>.<br /><a data-back-to="1" class="auth-wrong">Wrong address?</a></p>
+        <div class="auth-otp" id="auth-otp-boxes">
+          <input type="text" maxlength="1" inputmode="numeric" aria-label="Digit 1" /><input type="text" maxlength="1" inputmode="numeric" aria-label="Digit 2" /><input type="text" maxlength="1" inputmode="numeric" aria-label="Digit 3" /><input type="text" maxlength="1" inputmode="numeric" aria-label="Digit 4" /><input type="text" maxlength="1" inputmode="numeric" aria-label="Digit 5" /><input type="text" maxlength="1" inputmode="numeric" aria-label="Digit 6" />
+        </div>
+        <div id="auth-otp-error" class="auth-error" style="display:none;"></div>
+        <button class="btn btn--accent btn--block btn--lg" id="auth-otp-verify" type="button">Verify &amp; continue <span class="arrow">→</span></button>
+        <p class="auth-resend">Didn't receive? <span id="auth-resend">Resend in 0:42</span></p>
+      </section>
+      <section class="auth-step" data-step="3">
+        <div class="auth-welcome-check">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="auth-kicker is-success centered"><span>YOU'RE IN</span></div>
+        <h2 class="auth-h1 centered">Welcome to <em>the change.</em></h2>
+        <p class="auth-lede centered">Your account is ready. Pick up where you left off, or start exploring.</p>
+        <button class="btn btn--accent btn--block btn--lg" id="auth-welcome-done" type="button" style="margin-top:18px;">Get started <span class="arrow">→</span></button>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+/* PWA: register service worker + install prompt */
+(function() {
+  if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/sw.js').catch(function(err) {
+        console.warn('[BTC] SW registration failed:', err);
+      });
+    });
+  }
+
+  // Capture beforeinstallprompt for "Install app" CTA
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', function(e) {
+    e.preventDefault();
+    deferredPrompt = e;
+    // Show our install button (if footer has one)
+    const btn = document.getElementById('btc-install-btn');
+    if (btn) {
+      btn.hidden = false;
+      btn.addEventListener('click', async function() {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted' && window.btcToast) {
+          window.btcToast('B The Change installed on your phone.', 'success');
+        }
+        deferredPrompt = null;
+        btn.hidden = true;
+      });
+    }
+  });
+
+  // Hide install button after install
+  window.addEventListener('appinstalled', function() {
+    const btn = document.getElementById('btc-install-btn');
+    if (btn) btn.hidden = true;
+  });
+})();
+</script>
+<script>
+/* GLOBAL TOAST — window.btcToast(msg, type='info'|'success'|'error', duration=4000) */
+window.btcToast = function(msg, type, duration) {
+  type = type || 'info';
+  duration = duration || 4000;
+  const stack = document.getElementById('btc-toast-stack');
+  if (!stack) return;
+  const el = document.createElement('div');
+  el.className = 'btc-toast btc-toast--' + type;
+  const ic = type === 'success' ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+            : type === 'error' ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+            : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+  el.innerHTML = '<span class="btc-toast-icon">' + ic + '</span><span class="btc-toast-msg">' + msg + '</span><button class="btc-toast-close" aria-label="Dismiss">×</button>';
+  stack.appendChild(el);
+  const dismiss = () => { el.classList.add('is-leaving'); setTimeout(() => el.remove(), 250); };
+  el.querySelector('.btc-toast-close').addEventListener('click', dismiss);
+  setTimeout(dismiss, duration);
+};
+const hdr = document.getElementById('hdr');
+window.addEventListener('scroll', () => hdr.classList.toggle('scrolled', window.scrollY > 8), { passive: true });
+const menuBtn = document.getElementById('menu-btn');
+const nav = document.getElementById('nav');
+menuBtn?.addEventListener('click', () => { nav.classList.toggle('is-open'); menuBtn.classList.toggle('is-active'); });
+nav?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => { nav.classList.remove('is-open'); menuBtn?.classList.remove('is-active'); }));
+const io = new IntersectionObserver((entries) => { entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } }); }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+document.querySelectorAll('[data-reveal]').forEach(el => io.observe(el));
+function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+function countUp(el) {
+  const target = parseFloat(el.dataset.count);
+  const decimals = parseInt(el.dataset.decimal || '0', 10);
+  const duration = 1400;
+  const start = performance.now();
+  function tick(now) {
+    const t = Math.min(1, (now - start) / duration);
+    const v = target * easeOut(t);
+    el.textContent = decimals > 0 ? v.toFixed(decimals) : Math.round(v).toLocaleString('en-IN');
+    if (t < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+const countObserver = new IntersectionObserver((entries) => { entries.forEach(e => { if (e.isIntersecting) { countUp(e.target); countObserver.unobserve(e.target); } }); }, { threshold: 0.5 });
+document.querySelectorAll('[data-count]').forEach(el => countObserver.observe(el));
+(function() {
+  const modal = document.getElementById('auth-modal'); if (!modal) return;
+  const closeBtn = document.getElementById('auth-close');
+  const steps = modal.querySelectorAll('.auth-step');
+  const stepsContainer = modal.querySelector('.auth-steps');
+  let resendInterval = null;
+  function open() { modal.classList.add('is-open'); modal.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden'; goTo(1); }
+  function close() { modal.classList.remove('is-open'); modal.setAttribute('aria-hidden', 'true'); document.body.style.overflow = ''; if (resendInterval) clearInterval(resendInterval); modal.querySelectorAll('#auth-otp-boxes input').forEach(i => { i.value = ''; i.classList.remove('is-filled'); }); }
+  function goTo(n) { steps.forEach(s => s.classList.toggle('is-active', parseInt(s.dataset.step, 10) === n)); stepsContainer.scrollTop = 0; if (n === 2) startResendTimer(); if (n === 1) setTimeout(() => modal.querySelector('#auth-phone-input')?.focus(), 50); if (n === 2) setTimeout(() => modal.querySelector('#auth-otp-boxes input')?.focus(), 50); }
+  /* Auto-open modal if URL has ?signin=1 (e.g. redirected from a gated page) */
+  if (new URLSearchParams(window.location.search).has('signin')) { open(); }
+  document.querySelectorAll('[data-auth-open]').forEach(b => b.addEventListener('click', e => { e.preventDefault(); open(); }));
+  closeBtn.addEventListener('click', close);
+  modal.addEventListener('click', e => { if (e.target === modal) close(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal.classList.contains('is-open')) close(); });
+  modal.querySelectorAll('[data-back-to]').forEach(b => b.addEventListener('click', () => goTo(parseInt(b.dataset.backTo, 10))));
+  /* Auth method tabs (Email default, Phone shows "coming soon" notice) */
+  const phoneWarn = document.getElementById('auth-phone-warn');
+  modal.querySelectorAll('.auth-tab').forEach(t => t.addEventListener('click', () => {
+    modal.querySelectorAll('.auth-tab').forEach(x => x.classList.remove('is-active'));
+    t.classList.add('is-active');
+    const input = modal.querySelector('#auth-phone-input');
+    const phoneRow = modal.querySelector('#auth-phone-row');
+    if (t.dataset.tab === 'email') {
+      input.type = 'email'; input.placeholder = 'you@example.com'; input.value = '';
+      input.classList.remove('auth-phone-input');
+      modal.querySelector('.auth-label').textContent = 'EMAIL ADDRESS';
+      if (phoneRow) phoneRow.classList.add('is-email');
+      if (phoneWarn) phoneWarn.style.display = 'none';
+    } else {
+      input.type = 'tel'; input.placeholder = '90009 35898'; input.value = '';
+      input.classList.add('auth-phone-input');
+      modal.querySelector('.auth-label').textContent = 'MOBILE NUMBER';
+      if (phoneRow) phoneRow.classList.remove('is-email');
+      if (phoneWarn) phoneWarn.style.display = 'block';
+    }
+    input.focus();
+  }));
+  /* Country code dropdown */
+  const ccBtn = document.getElementById('auth-cc-btn');
+  const ccList = document.getElementById('auth-cc-list');
+  const ccCode = document.getElementById('auth-cc-code');
+  const ccFlag = ccBtn ? ccBtn.querySelector('.auth-cc-flag') : null;
+  if (ccBtn && ccList) {
+    ccBtn.addEventListener('click', e => { e.stopPropagation(); const isOpen = ccList.classList.toggle('is-open'); ccBtn.setAttribute('aria-expanded', isOpen); });
+    document.addEventListener('click', e => { if (ccList.classList.contains('is-open') && !e.target.closest('.auth-cc')) { ccList.classList.remove('is-open'); ccBtn.setAttribute('aria-expanded', 'false'); }});
+    ccList.querySelectorAll('button').forEach(b => b.addEventListener('click', () => { ccCode.textContent = b.dataset.cc; ccFlag.textContent = b.dataset.flag; ccList.classList.remove('is-open'); ccBtn.setAttribute('aria-expanded', 'false'); modal.querySelector('#auth-phone-input').focus(); }));
+  }
+  /* SUPABASE OTP — real wiring */
+  let _SB = null;
+  function getSB() {
+    if (_SB) return _SB;
+    if (!window.SUPABASE_CONFIG || !window.supabase) return null;
+    _SB = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
+    return _SB;
+  }
+  let _pendingEmail = null;
+  const errEl = document.getElementById('auth-error');
+  const otpErrEl = document.getElementById('auth-otp-error');
+  function showErr(el, msg) { if (!el) return; el.textContent = msg; el.style.display = 'block'; }
+  function hideErr(el) { if (el) el.style.display = 'none'; }
+  document.getElementById('auth-phone-submit').addEventListener('click', async () => {
+    hideErr(errEl);
+    const input = document.getElementById('auth-phone-input');
+    const submitBtn = document.getElementById('auth-phone-submit');
+    const activeTab = modal.querySelector('.auth-tab.is-active').dataset.tab;
+    if (activeTab === 'phone') {
+      showErr(errEl, 'Phone sign-in is coming soon. Please switch to Email for now.');
+      return;
+    }
+    const email = input.value.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { input.style.borderColor = '#C42828'; input.focus(); showErr(errEl, 'Please enter a valid email address.'); return; }
+    input.style.borderColor = '';
+    const SB = getSB();
+    if (!SB) { showErr(errEl, 'Sign-in is not configured yet. Please contact support@bthechange.in.'); return; }
+    submitBtn.disabled = true; submitBtn.textContent = 'Sending code...';
+    try {
+      const { error } = await SB.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
+      if (error) throw error;
+      _pendingEmail = email;
+      document.getElementById('auth-otp-phone').textContent = email;
+      goTo(2);
+    } catch (e) {
+      showErr(errEl, (e && e.message) || 'Could not send code. Please try again.');
+    } finally {
+      submitBtn.disabled = false; submitBtn.innerHTML = 'Continue <span class="arrow">→</span>';
+    }
+  });
+  const otpInputs = modal.querySelectorAll('#auth-otp-boxes input');
+  otpInputs.forEach((inp, i) => {
+    inp.addEventListener('input', e => { const v = e.target.value.replace(/[^0-9]/g, '').slice(0, 1); e.target.value = v; e.target.classList.toggle('is-filled', !!v); if (v && i < otpInputs.length - 1) otpInputs[i + 1].focus(); });
+    inp.addEventListener('keydown', e => { if (e.key === 'Backspace' && !e.target.value && i > 0) otpInputs[i - 1].focus(); });
+    inp.addEventListener('paste', e => { const text = (e.clipboardData || window.clipboardData).getData('text'); const digits = text.replace(/[^0-9]/g, '').slice(0, 6); if (digits.length === 6) { e.preventDefault(); digits.split('').forEach((d, idx) => { if (otpInputs[idx]) { otpInputs[idx].value = d; otpInputs[idx].classList.add('is-filled'); } }); otpInputs[5].focus(); } });
+  });
+  document.getElementById('auth-otp-verify').addEventListener('click', async () => {
+    hideErr(otpErrEl);
+    const code = Array.from(otpInputs).map(x => x.value).join('');
+    if (code.length !== 6) { otpInputs.forEach(i => { if (!i.value) i.style.borderColor = '#C42828'; }); showErr(otpErrEl, 'Please enter all 6 digits.'); return; }
+    otpInputs.forEach(i => { i.style.borderColor = ''; });
+    const SB = getSB();
+    if (!SB || !_pendingEmail) { showErr(otpErrEl, 'Session expired. Go back and try again.'); return; }
+    const verifyBtn = document.getElementById('auth-otp-verify');
+    verifyBtn.disabled = true; verifyBtn.textContent = 'Verifying...';
+    try {
+      const { data, error } = await SB.auth.verifyOtp({ email: _pendingEmail, token: code, type: 'email' });
+      if (error) throw error;
+      if (!data || !data.session) throw new Error('Verification did not return a session.');
+      goTo(3);
+    } catch (e) {
+      showErr(otpErrEl, (e && e.message) || 'Code is incorrect or expired. Please try again.');
+    } finally {
+      verifyBtn.disabled = false; verifyBtn.innerHTML = 'Verify &amp; continue <span class="arrow">→</span>';
+    }
+  });
+  document.getElementById('auth-welcome-done').addEventListener('click', () => {
+    close();
+    /* If we landed on submit.html (or any auth-required page) via redirect, go there */
+    try {
+      const next = sessionStorage.getItem('btc-auth-next');
+      if (next) { sessionStorage.removeItem('btc-auth-next'); window.location.href = next; return; }
+    } catch (_) {}
+    /* Otherwise reload so admin-bell.js picks up the new session and reveals the user dropdown */
+    window.location.reload();
+  });
+  function startResendTimer() { if (resendInterval) clearInterval(resendInterval); let secs = 42; const link = document.getElementById('auth-resend'); link.classList.remove('is-active'); const tick = () => { if (secs <= 0) { clearInterval(resendInterval); link.textContent = 'Resend code'; link.classList.add('is-active'); return; } const m = String(Math.floor(secs / 60)); const s = String(secs % 60).padStart(2, '0'); link.textContent = 'Resend in ' + m + ':' + s; secs--; }; tick(); resendInterval = setInterval(tick, 1000); }
+  document.getElementById('auth-resend').addEventListener('click', async e => {
+    if (!e.target.classList.contains('is-active')) return;
+    if (!_pendingEmail) return;
+    const SB = getSB(); if (!SB) return;
+    try { await SB.auth.signInWithOtp({ email: _pendingEmail, options: { shouldCreateUser: true } }); startResendTimer(); }
+    catch (err) { showErr(otpErrEl, (err && err.message) || 'Could not resend.'); }
+  });
+
+  /* LEADERSHIP CAROUSEL */
+  const lTrack = document.getElementById('leader-track');
+  if (lTrack) {
+    const slides = lTrack.querySelectorAll('.leader-slide');
+    const total = slides.length;
+    const prevBtn = document.getElementById('leader-prev');
+    const nextBtn = document.getElementById('leader-next');
+    const counter = document.getElementById('leader-current');
+    const dots = document.querySelectorAll('.leader-dot');
+    let idx = 0;
+    const update = () => {
+      lTrack.style.transform = 'translateX(-' + (idx * 100) + '%)';
+      counter.textContent = (idx + 1);
+      prevBtn.disabled = idx === 0;
+      nextBtn.disabled = idx === total - 1;
+      dots.forEach((d, i) => d.classList.toggle('is-active', i === idx));
+    };
+    prevBtn.addEventListener('click', () => { if (idx > 0) { idx--; update(); } });
+    nextBtn.addEventListener('click', () => { if (idx < total - 1) { idx++; update(); } });
+    dots.forEach(d => d.addEventListener('click', () => { idx = parseInt(d.dataset.go, 10); update(); }));
+    /* Keyboard arrows when focused near the carousel */
+    document.addEventListener('keydown', e => {
+      if (!document.activeElement.closest('.leader-controls, .leader-dots, .leader-carousel')) return;
+      if (e.key === 'ArrowLeft' && idx > 0) { idx--; update(); }
+      if (e.key === 'ArrowRight' && idx < total - 1) { idx++; update(); }
+    });
+    /* Swipe support for touch */
+    let startX = 0;
+    lTrack.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
+    lTrack.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - startX;
+      if (Math.abs(dx) < 50) return;
+      if (dx < 0 && idx < total - 1) { idx++; update(); }
+      if (dx > 0 && idx > 0) { idx--; update(); }
+    });
+  }
+})();
+</script>
+</body>
+</html>

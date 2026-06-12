@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Console · B The Change</title>
+<style>
+  body { margin: 0; background: #1C1C1E; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: system-ui, sans-serif; }
+  .spinner { width: 32px; height: 32px; border: 3px solid rgba(255,255,255,0.15); border-top-color: #1E3A6F; border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script defer src="../assets/supabase-config.js"></script>
+</head>
+<body>
+<div class="spinner"></div>
+<script>
+window.addEventListener('load', async function() {
+  if (!window.SUPABASE_CONFIG || !window.supabase) {
+    window.location.href = '../login.html'; return;
+  }
+  var SB = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
+  var res = await SB.auth.getSession();
+  if (!res.data || !res.data.session) {
+    sessionStorage.setItem('btc-auth-next', window.location.pathname);
+    window.location.href = '../login.html'; return;
+  }
+  var uid = res.data.session.user.id;
+  var profRes = await SB.from('profiles').select('role').eq('user_id', uid).maybeSingle();
+  var role = (profRes.data && profRes.data.role) || 'volunteer';
+  var map = { kid: 'kids.html', volunteer: 'volunteer.html', admin: '../admin.html', partner: 'volunteer.html', beneficiary: '../my.html' };
+  window.location.href = map[role] || 'volunteer.html';
+});
+</script>
+</body>
+</html>
